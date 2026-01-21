@@ -96,11 +96,11 @@ export default async function ProjectPage({ params }: Props) {
                 </Link>
 
                 {project.thumbnail && (
-                    <div className="mb-8 rounded-lg overflow-hidden border border-white/10">
+                    <div className="mb-8 rounded-lg overflow-hidden border border-white/10 bg-black/50">
                         <img
-                            src={urlFor(project.thumbnail).width(1200).height(630).url()}
+                            src={urlFor(project.thumbnail).width(1200).url()}
                             alt=""
-                            className="w-full object-cover max-h-[500px]"
+                            className="w-full h-auto"
                         />
                     </div>
                 )}
@@ -157,7 +157,7 @@ export default async function ProjectPage({ params }: Props) {
                         )}
                     </div>
 
-                    <div className="text-lg text-white/80 leading-relaxed border-b border-white/10 pb-8 mb-8">
+                    <div className="text-lg text-white/80 leading-relaxed border-b border-white/10 pb-8 mb-8 whitespace-pre-line">
                         {project.description}
                     </div>
                 </header>
