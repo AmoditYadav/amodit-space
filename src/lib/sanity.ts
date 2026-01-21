@@ -136,3 +136,24 @@ export async function getAbout() {
     return null;
   }
 }
+
+// ============ CONTACT QUERIES ============
+
+export async function getContact() {
+  if (!isSanityConfigured) return null;
+
+  try {
+    return await client.fetch(`
+      *[_type == "contact"][0] {
+        title,
+        subtitle,
+        email,
+        socials,
+        availability,
+        formEnabled
+      }
+    `);
+  } catch {
+    return null;
+  }
+}

@@ -84,7 +84,23 @@ In Sanity Dashboard:
 
 ---
 
-## 👤 Editing About Page
+## � Managing Contact Page
+
+1. Click **Contact Page** (there's only one)
+2. Edit:
+   - **Title**: Page heading
+   - **Subtitle**: Description text
+   - **Email**: Your email address
+   - **Social Links**: Click "Add item" and select platform:
+     - GitHub, LinkedIn, Twitter/X, YouTube, Instagram, Bluesky, Mastodon, Discord, Telegram, or Other
+     - Add the URL and optional display label
+   - **Availability**: Message about your availability
+   - **Show Contact Form**: Toggle to show/hide the contact form
+3. Click **Publish**
+
+---
+
+## �👤 Editing About Page
 
 1. Click **About Page** (there's only one)
 2. Edit:
