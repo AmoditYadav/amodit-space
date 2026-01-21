@@ -1,219 +1,162 @@
-# Author Guide: Managing Your Portfolio
+# Author Guide - Sanity CMS
 
-This guide explains how to update content on your portfolio website without touching any code.
-
-## 📱 Quick Access
-
-- **Your site**: https://amodit.space (or your custom domain)
-- **Admin panel**: https://amodit.space/admin
+This guide explains how to manage content for your portfolio website using Sanity CMS.
 
 ---
 
-## 🔐 Logging In
+## 🚀 One-Time Setup (Required)
 
-1. Go to `/admin` on your website
-2. Click "Login with Netlify Identity" (or your auth provider)
-3. Enter your email and password
-4. You'll see the Content Manager dashboard
+### Step 1: Create Sanity Account & Project
 
-**First time?** Check your email for an invitation to set up your account.
+1. Go to [sanity.io](https://www.sanity.io/) and sign up (free)
+2. Create a new project:
+   - Name: `portfolio`
+   - Dataset: `production`
+3. Note your **Project ID** (found in project settings)
 
----
+### Step 2: Add Environment Variables to Vercel
 
-## ✍️ Writing Blog Posts
+Go to **Vercel Dashboard → Your Project → Settings → Environment Variables**
 
-### Creating a New Post
+Add these:
 
-1. In the admin panel, click **Blog Posts** in the sidebar
-2. Click the **New Blog Posts** button
-3. Fill in the fields:
-   - **Title**: The headline of your post
-   - **Publish Date**: When the post was written
-   - **Thumbnail**: Optional cover image (click to upload)
-   - **Excerpt**: 1-2 sentences shown in the blog listing
-   - **Body**: Your full article (supports Markdown)
-   - **Draft**: Toggle ON to hide from public, OFF to publish
+| Name | Value |
+|------|-------|
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` | Your Sanity project ID |
+| `NEXT_PUBLIC_SANITY_DATASET` | `production` |
 
-4. Click **Save** to save as draft
-5. When ready to publish:
-   - Set **Draft** to OFF
-   - Click **Publish**
+Click **Save** and **Redeploy** your site.
 
-### Editing Existing Posts
+### Step 3: Configure CORS
 
-1. Go to **Blog Posts** in the sidebar
-2. Click on the post you want to edit
-3. Make your changes
-4. Click **Save** then **Publish**
-
-### Writing Tips
-
-The body supports **Markdown** formatting:
-
-```markdown
-# Heading 1
-## Heading 2
-
-**Bold text** and *italic text*
-
-- Bullet point
-- Another point
-
-1. Numbered list
-2. Second item
-
-[Link text](https://example.com)
-
-![Image caption](/uploads/image.jpg)
-
-`inline code` and:
-
-​```python
-# Code block
-print("Hello!")
-​```
-```
+In Sanity Dashboard:
+1. Go to **API → CORS origins**
+2. Add `https://amodit.space` (your domain)
+3. Add `http://localhost:3000` (for local dev)
 
 ---
 
-## 🚀 Adding Projects
+## ✍️ Daily Content Management
 
-### Creating a New Project
+### Accessing the CMS
 
-1. Click **Projects** in the sidebar
-2. Click **New Projects**
-3. Fill in:
+**Option A: Sanity Studio (Recommended)**
+- Go to: `https://your-project-name.sanity.studio`
+- Login with Google or GitHub
+
+**Option B: Embedded Studio**
+- Go to: `https://amodit.space/studio`
+- Login with the same credentials
+
+---
+
+## 📝 Writing Blog Posts
+
+1. In Sanity Studio, click **Blog Post** → **Create**
+2. Fill in:
+   - **Title**: Your post title
+   - **Slug**: Click "Generate" (or customize)
+   - **Published At**: Set the date
+   - **Excerpt**: Short summary for previews
+   - **Cover Image**: Upload an image
+   - **Body**: Write your content with rich text
+   - **Draft**: Toggle OFF to publish
+3. Click **Publish**
+
+**Your post appears on amodit.space within ~60 seconds.**
+
+---
+
+## 🚀 Managing Projects
+
+1. Click **Project** → **Create**
+2. Fill in:
    - **Title**: Project name
-   - **Description**: Brief explanation (2-3 sentences)
-   - **Thumbnail**: Screenshot or logo
-   - **Tags**: Technologies used (press Enter after each)
-   - **GitHub URL**: Link to source code
-   - **Demo URL**: Link to live demo
-   - **Paper URL**: Link to research paper (if applicable)
-   - **Featured**: Toggle ON to show prominently
+   - **Description**: What it does
+   - **Tags**: Add technology tags (Python, React, etc.)
+   - **Thumbnail**: Project screenshot or logo
+   - **GitHub URL**: Link to repository
+   - **Demo URL**: Live demo link
+   - **Paper URL**: Optional research paper
+   - **Featured**: Toggle ON to highlight
    - **Display Order**: Lower numbers appear first
-   - **Body**: Optional detailed description
-
-4. Click **Save** then **Publish**
-
-### Reordering Projects
-
-Change the **Display Order** number:
-- Lower numbers (1, 2, 3) appear first
-- Featured projects always appear before non-featured
+3. Click **Publish**
 
 ---
 
-## 🖼️ Uploading Images
+## 👤 Editing About Page
 
-### During Content Creation
-
-1. Click on any image field
-2. Click **Choose an image** or drag-and-drop
-3. Select your image file
-4. The image uploads automatically
-
-### Best Practices
-
-- **Blog thumbnails**: 1200x630px (social media friendly)
-- **Project thumbnails**: 800x600px minimum
-- **Format**: JPG for photos, PNG for graphics
-- **File size**: Keep under 500KB for fast loading
-
-### Where Images Are Stored
-
-Uploaded images go to:
-- Blog images: `/uploads/blog/`
-- Project images: `/uploads/projects/`
+1. Click **About Page** (there's only one)
+2. Edit:
+   - **Title**: Page heading
+   - **Profile Image**: Your photo
+   - **Biography**: Rich text about yourself
+   - **Skills**: Add categories and skill items
+   - **Experience**: Add work history entries
+3. Click **Publish**
 
 ---
 
-## 🔊 Audio Toggle
+## 📸 Uploading Images
 
-Your portfolio has ambient background music that visitors can control:
-
-- **Default**: Audio is muted when visitors arrive
-- **Location**: Bottom-right corner of the screen
-- **Icons**: 
-  - 🔊 = Audio playing (click to mute)
-  - 🔇 = Audio muted (click to play)
-
-The audio file is located at `/public/audio/`. To change it:
-1. Replace the MP3 file in that folder
-2. Keep the same filename, or update `AudioPlayer.tsx`
+1. In any image field, click **Upload**
+2. Drag & drop or select files
+3. Use the hotspot tool to set focus area
+4. Images are automatically optimized by Sanity CDN
 
 ---
 
-## 📅 Publishing Workflow
+## 📊 Content States
 
-### Draft vs Published
+| State | Meaning |
+|-------|---------|
+| **Draft** | Only visible in Sanity Studio |
+| **Published** | Live on your website |
 
-| Status | Visible to Public? |
-|--------|-------------------|
-| Draft ON | No (only you see it in admin) |
-| Draft OFF + Saved | No (changes saved locally) |
-| Draft OFF + Published | Yes (live on site) |
-
-### Steps to Publish
-
-1. Create/edit content
-2. Set **Draft** to OFF
-3. Click **Save**
-4. Click **Publish** button (top right)
-5. Add a commit message (e.g., "Add new blog post")
-6. Click **Publish**
-
-The site automatically rebuilds in ~1-2 minutes.
+Toggle the **Draft** field to control visibility.
 
 ---
 
-## ⚠️ Troubleshooting
+## ⏱️ When Changes Appear
 
-### "I can't log in"
+| Content Type | Update Time |
+|--------------|-------------|
+| Blog Posts | ~60 seconds |
+| Projects | ~60 seconds |
+| About Page | ~1 hour |
 
-- Check if you received an invitation email
-- Try "Forgot password" to reset
-- Make sure you're using the correct email
-
-### "My changes aren't showing"
-
-- Did you click **Publish** (not just Save)?
-- Wait 2-3 minutes for the site to rebuild
-- Try a hard refresh (Ctrl+Shift+R / Cmd+Shift+R)
-
-### "Image won't upload"
-
-- Check file size (max 10MB recommended)
-- Use JPG, PNG, or WebP format
-- Try a different browser
-
-### "Something looks broken"
-
-- Take a screenshot
-- Note what you were doing
-- Contact your developer with details
+No manual redeploy needed. ISR handles it automatically.
 
 ---
 
-## 🆘 Need Help?
+## ⚠️ Things to Avoid
 
-If something isn't working:
-
-1. Check this guide first
-2. Try refreshing the admin panel
-3. For technical issues, contact your developer
+- ❌ Don't delete the About Page document (it's a singleton)
+- ❌ Don't change slugs of published posts (breaks existing links)
+- ❌ Don't upload extremely large images (>5MB) - compress first
 
 ---
 
-## 📚 Quick Reference
+## 🛠️ Troubleshooting
 
-| Task | Where | Button |
-|------|-------|--------|
-| New blog post | Blog Posts | New Blog Posts |
-| New project | Projects | New Projects |
-| Edit content | Click any item | Edit fields, Save |
-| Publish | Top of editor | Publish |
-| Upload image | Image field | Choose an image |
-| Delete item | Bottom of editor | Delete |
+**Changes not appearing?**
+- Wait 60 seconds for ISR refresh
+- Hard refresh browser (Ctrl+Shift+R)
+- Check if content is published (not draft)
 
-Happy publishing! 🎉
+**Images not loading?**
+- Verify CORS is configured for your domain
+- Check the image was fully uploaded
+
+**Can't access Studio?**
+- Clear browser cookies
+- Try incognito mode
+- Re-login to Sanity
+
+---
+
+## 📞 Support
+
+For CMS issues: [sanity.io/docs](https://www.sanity.io/docs)
+
+For website issues: Check the repository README or open a GitHub issue.

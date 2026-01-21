@@ -1,153 +1,165 @@
-import type { Metadata } from "next";
+import { getAbout, urlFor } from '@/lib/sanity';
+import { PortableText } from '@portabletext/react';
 
-export const metadata: Metadata = {
-    title: "About",
-    description: "Learn about my background, skills, and experience in AI and machine learning engineering.",
-};
+export const revalidate = 3600; // Revalidate every hour
 
-export default function AboutPage() {
-    return (
-        <div className="page-content">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                {/* Hero Section */}
-                <section className="mb-16 text-center">
-                    <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-                        About Me
-                    </h1>
-                    <p className="text-xl text-white/70 max-w-2xl mx-auto">
-                        AI Engineer passionate about building intelligent systems that solve real-world problems
-                    </p>
-                </section>
-
-                {/* Bio Section */}
-                <section className="mb-16">
-                    <div className="bg-white/5 rounded-2xl p-8 border border-white/10">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Background</h2>
-                        <div className="prose">
-                            <p>
-                                I&apos;m an AI Engineer with expertise in deep learning, natural language processing,
-                                and computer vision. My work focuses on bridging the gap between cutting-edge
-                                research and production-ready systems.
-                            </p>
-                            <p>
-                                With experience across the full ML lifecycle—from data engineering to model
-                                deployment—I build solutions that are not just technically impressive but
-                                also reliable and maintainable.
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Skills Section */}
-                <section className="mb-16">
-                    <h2 className="text-2xl font-semibold text-white mb-6">Skills & Expertise</h2>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <SkillCard
-                            title="Machine Learning"
-                            skills={["Deep Learning", "NLP", "Computer Vision", "Reinforcement Learning", "MLOps"]}
-                        />
-                        <SkillCard
-                            title="Languages & Frameworks"
-                            skills={["Python", "PyTorch", "TensorFlow", "TypeScript", "React"]}
-                        />
-                        <SkillCard
-                            title="Infrastructure"
-                            skills={["Kubernetes", "Docker", "AWS", "GCP", "MLflow"]}
-                        />
-                        <SkillCard
-                            title="Research Areas"
-                            skills={["Foundation Models", "Multimodal AI", "Efficient Inference", "AI Safety"]}
-                        />
-                    </div>
-                </section>
-
-                {/* Experience Timeline */}
-                <section className="mb-16">
-                    <h2 className="text-2xl font-semibold text-white mb-6">Experience</h2>
-
-                    <div className="space-y-6">
-                        <TimelineItem
-                            title="Senior AI Engineer"
-                            company="Tech Company"
-                            period="2022 - Present"
-                            description="Leading development of production ML systems, mentoring junior engineers, and architecting scalable AI solutions."
-                        />
-                        <TimelineItem
-                            title="ML Engineer"
-                            company="AI Startup"
-                            period="2020 - 2022"
-                            description="Built end-to-end ML pipelines, deployed models at scale, and contributed to core product development."
-                        />
-                        <TimelineItem
-                            title="Research Assistant"
-                            company="University Lab"
-                            period="2018 - 2020"
-                            description="Conducted research in deep learning, published papers, and developed novel architectures."
-                        />
-                    </div>
-                </section>
-
-                {/* CTA */}
-                <section className="text-center">
-                    <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl p-8 border border-white/10">
-                        <h2 className="text-2xl font-semibold text-white mb-4">Let&apos;s Connect</h2>
-                        <p className="text-white/70 mb-6">
-                            Interested in collaboration or want to discuss AI? I&apos;d love to hear from you.
-                        </p>
-                        <a
-                            href="/contact"
-                            className="inline-flex items-center px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-colors"
-                        >
-                            Get in Touch
-                        </a>
-                    </div>
-                </section>
-            </div>
-        </div>
-    );
+interface Skill {
+    category: string;
+    items: string[];
 }
 
-function SkillCard({ title, skills }: { title: string; skills: string[] }) {
-    return (
-        <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-            <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
-            <div className="flex flex-wrap gap-2">
-                {skills.map((skill) => (
-                    <span
-                        key={skill}
-                        className="px-3 py-1 bg-white/10 rounded-full text-sm text-white/80"
-                    >
-                        {skill}
-                    </span>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-function TimelineItem({
-    title,
-    company,
-    period,
-    description
-}: {
-    title: string;
+interface Experience {
+    role: string;
     company: string;
     period: string;
     description: string;
-}) {
+}
+
+interface AboutData {
+    title?: string;
+    profileImage?: { asset: { _ref: string } };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    bio?: any[];
+    skills?: Skill[];
+    experience?: Experience[];
+}
+
+const portableTextComponents = {
+    marks: {
+        link: ({ children, value }: { children: React.ReactNode; value?: { href: string } }) => (
+            <a
+                href={value?.href || '#'}
+                className="text-blue-400 hover:text-blue-300 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {children}
+            </a>
+        ),
+    },
+    block: {
+        h2: ({ children }: { children?: React.ReactNode }) => (
+            <h2 className="text-2xl font-bold text-white mt-8 mb-4">{children}</h2>
+        ),
+        h3: ({ children }: { children?: React.ReactNode }) => (
+            <h3 className="text-xl font-semibold text-white mt-6 mb-3">{children}</h3>
+        ),
+        normal: ({ children }: { children?: React.ReactNode }) => (
+            <p className="text-white/80 leading-relaxed mb-4">{children}</p>
+        ),
+    },
+};
+
+// Fallback content when CMS is empty
+function FallbackContent() {
     return (
-        <div className="relative pl-8 border-l border-white/20">
-            <div className="absolute left-0 top-1 w-3 h-3 bg-white rounded-full -translate-x-1/2" />
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <div className="flex flex-wrap items-baseline gap-2 mb-2">
-                    <h3 className="text-lg font-semibold text-white">{title}</h3>
-                    <span className="text-white/50">at {company}</span>
+        <>
+            <section className="mb-16">
+                <h2 className="text-2xl font-bold text-white mb-6">About Me</h2>
+                <p className="text-white/80 leading-relaxed mb-4">
+                    AI Engineer passionate about building intelligent systems that solve real-world problems.
+                </p>
+                <p className="text-white/80 leading-relaxed">
+                    Add your bio through the CMS at /studio to customize this section.
+                </p>
+            </section>
+
+            <section className="mb-16">
+                <h2 className="text-2xl font-bold text-white mb-6">Skills</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white/[0.03] border border-white/10 rounded-lg p-5">
+                        <h3 className="text-lg font-medium text-white mb-3">Machine Learning</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {['PyTorch', 'TensorFlow', 'Transformers', 'LLMs'].map((skill) => (
+                                <span key={skill} className="px-3 py-1 text-sm bg-white/10 text-white/70 rounded">
+                                    {skill}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="bg-white/[0.03] border border-white/10 rounded-lg p-5">
+                        <h3 className="text-lg font-medium text-white mb-3">Development</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {['TypeScript', 'Python', 'React', 'Next.js'].map((skill) => (
+                                <span key={skill} className="px-3 py-1 text-sm bg-white/10 text-white/70 rounded">
+                                    {skill}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-                <p className="text-sm text-white/40 mb-3">{period}</p>
-                <p className="text-white/70">{description}</p>
+            </section>
+        </>
+    );
+}
+
+export default async function AboutPage() {
+    const about: AboutData | null = await getAbout();
+
+    return (
+        <main className="min-h-screen bg-black pt-24 pb-16 px-4">
+            <div className="max-w-3xl mx-auto">
+                <h1 className="text-4xl font-bold text-white mb-8">{about?.title || 'About'}</h1>
+
+                {about?.profileImage && (
+                    <div className="mb-10">
+                        <img
+                            src={urlFor(about.profileImage).width(200).height(200).url()}
+                            alt="Profile"
+                            className="w-32 h-32 rounded-full object-cover border-2 border-white/20"
+                        />
+                    </div>
+                )}
+
+                {about?.bio ? (
+                    <section className="mb-16">
+                        <PortableText value={about.bio} components={portableTextComponents} />
+                    </section>
+                ) : null}
+
+                {about?.skills && about.skills.length > 0 ? (
+                    <section className="mb-16">
+                        <h2 className="text-2xl font-bold text-white mb-6">Skills</h2>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {about.skills.map((skill, idx) => (
+                                <div key={idx} className="bg-white/[0.03] border border-white/10 rounded-lg p-5">
+                                    <h3 className="text-lg font-medium text-white mb-3">{skill.category}</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {skill.items?.map((item) => (
+                                            <span
+                                                key={item}
+                                                className="px-3 py-1 text-sm bg-white/10 text-white/70 rounded"
+                                            >
+                                                {item}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                ) : null}
+
+                {about?.experience && about.experience.length > 0 ? (
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-6">Experience</h2>
+                        <div className="space-y-6">
+                            {about.experience.map((exp, idx) => (
+                                <div key={idx} className="border-l-2 border-white/20 pl-6">
+                                    <h3 className="text-lg font-semibold text-white">{exp.role}</h3>
+                                    <p className="text-white/60 text-sm mb-2">
+                                        {exp.company} • {exp.period}
+                                    </p>
+                                    <p className="text-white/70">{exp.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                ) : null}
+
+                {/* Show fallback if no CMS content */}
+                {!about && <FallbackContent />}
             </div>
-        </div>
+        </main>
     );
 }

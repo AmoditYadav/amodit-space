@@ -1,126 +1,128 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getBlogPost, getBlogPosts } from "@/lib/content";
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { PortableText } from '@portabletext/react';
+import { getPost, getPostSlugs, urlFor } from '@/lib/sanity';
+import type { Metadata } from 'next';
 
-interface BlogPostPageProps {
+export const revalidate = 60;
+
+interface Props {
     params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-    const posts = await getBlogPosts();
-    return posts.map((post) => ({
-        slug: post.slug,
-    }));
+    const slugs = await getPostSlugs();
+    return slugs.map((slug: string) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
-    const post = await getBlogPost(slug);
+    const post = await getPost(slug);
 
     if (!post) {
-        return {
-            title: "Post Not Found",
-        };
+        return { title: 'Post Not Found' };
     }
 
     return {
-        title: post.title,
-        description: post.excerpt,
-        openGraph: {
-            title: post.title,
-            description: post.excerpt,
-            type: "article",
-            publishedTime: post.date,
-        },
+        title: post.seoTitle || post.title,
+        description: post.seoDescription || post.excerpt,
     };
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
+const portableTextComponents = {
+    types: {
+        image: ({ value }: { value: { asset: { _ref: string }; alt?: string } }) => (
+            <figure className="my-8">
+                <img
+                    src={urlFor(value).width(800).url()}
+                    alt={value.alt || ''}
+                    className="rounded-lg w-full"
+                />
+            </figure>
+        ),
+    },
+    marks: {
+        link: ({ children, value }: { children: React.ReactNode; value?: { href: string } }) => (
+            <a
+                href={value?.href || '#'}
+                className="text-blue-400 hover:text-blue-300 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {children}
+            </a>
+        ),
+        code: ({ children }: { children: React.ReactNode }) => (
+            <code className="bg-white/10 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
+        ),
+    },
+    block: {
+        h2: ({ children }: { children?: React.ReactNode }) => (
+            <h2 className="text-2xl font-bold text-white mt-10 mb-4">{children}</h2>
+        ),
+        h3: ({ children }: { children?: React.ReactNode }) => (
+            <h3 className="text-xl font-semibold text-white mt-8 mb-3">{children}</h3>
+        ),
+        h4: ({ children }: { children?: React.ReactNode }) => (
+            <h4 className="text-lg font-medium text-white mt-6 mb-2">{children}</h4>
+        ),
+        blockquote: ({ children }: { children?: React.ReactNode }) => (
+            <blockquote className="border-l-4 border-blue-500 pl-4 my-6 text-white/70 italic">
+                {children}
+            </blockquote>
+        ),
+        normal: ({ children }: { children?: React.ReactNode }) => (
+            <p className="text-white/80 leading-relaxed mb-4">{children}</p>
+        ),
+    },
+};
+
+export default async function BlogPostPage({ params }: Props) {
     const { slug } = await params;
-    const post = await getBlogPost(slug);
+    const post = await getPost(slug);
 
     if (!post) {
         notFound();
     }
 
-    const formattedDate = new Date(post.date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-
     return (
-        <div className="page-content">
-            <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                {/* Back link */}
+        <main className="min-h-screen bg-black pt-24 pb-16 px-4">
+            <article className="max-w-3xl mx-auto">
                 <Link
                     href="/blog"
-                    className="inline-flex items-center text-sm text-white/50 hover:text-white transition-colors mb-8"
+                    className="inline-flex items-center text-white/50 hover:text-white mb-8 transition-colors"
                 >
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Back to Blog
+                    <span className="mr-2">←</span> Back to Blog
                 </Link>
 
-                {/* Header */}
-                <header className="mb-12">
-                    <div className="flex items-center gap-3 text-sm text-white/50 mb-4">
-                        <time dateTime={post.date}>{formattedDate}</time>
-                        {post.readingTime && (
-                            <>
-                                <span>•</span>
-                                <span>{post.readingTime} min read</span>
-                            </>
-                        )}
-                    </div>
-
-                    <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                        {post.title}
-                    </h1>
-
-                    {post.excerpt && (
-                        <p className="text-xl text-white/60">
-                            {post.excerpt}
-                        </p>
-                    )}
-                </header>
-
-                {/* Thumbnail */}
-                {post.thumbnail && (
-                    <div className="mb-12 rounded-2xl overflow-hidden">
+                {post.coverImage && (
+                    <div className="mb-8 rounded-lg overflow-hidden">
                         <img
-                            src={post.thumbnail}
-                            alt={post.title}
-                            className="w-full aspect-video object-cover"
+                            src={urlFor(post.coverImage).width(1200).height(630).url()}
+                            alt=""
+                            className="w-full"
                         />
                     </div>
                 )}
 
-                {/* Content */}
-                <div
-                    className="prose"
-                    dangerouslySetInnerHTML={{ __html: post.contentHtml || '' }}
-                />
+                <header className="mb-10">
+                    <time className="text-sm text-white/40 block mb-3">
+                        {post.publishedAt
+                            ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                            })
+                            : 'Draft'}
+                    </time>
+                    <h1 className="text-4xl font-bold text-white mb-4">{post.title}</h1>
+                    {post.excerpt && <p className="text-xl text-white/60">{post.excerpt}</p>}
+                </header>
 
-                {/* Footer */}
-                <footer className="mt-16 pt-8 border-t border-white/10">
-                    <div className="flex items-center justify-between">
-                        <Link
-                            href="/blog"
-                            className="inline-flex items-center text-white/70 hover:text-white transition-colors"
-                        >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                            All Posts
-                        </Link>
-
-                        {/* Share buttons could go here */}
-                    </div>
-                </footer>
+                <div className="prose prose-invert max-w-none">
+                    {post.body && <PortableText value={post.body} components={portableTextComponents} />}
+                </div>
             </article>
-        </div>
+        </main>
     );
 }
