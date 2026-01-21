@@ -1,0 +1,163 @@
+backend:
+  name: git-gateway
+  branch: main
+
+# When using the local backend for testing:
+# backend:
+#   name: proxy
+#   proxy_url: http://localhost:8081/api/v1
+
+# Media files
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+# Site configuration
+site_url: https://amodit.space
+display_url: https://amodit.space
+logo_url: /logo.png
+
+# Editorial workflow for drafts
+publish_mode: editorial_workflow
+
+# Locale
+locale: 'en'
+
+# Collections
+collections:
+  # Blog Posts
+  - name: "blog"
+    label: "Blog Posts"
+    folder: "src/content/blog"
+    create: true
+    slug: "{{slug}}"
+    preview_path: "blog/{{slug}}"
+    summary: "{{title}} - {{date}}"
+    sortable_fields: ['title', 'date']
+    fields:
+      - label: "Title"
+        name: "title"
+        widget: "string"
+        required: true
+        
+      - label: "Publish Date"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        required: true
+        
+      - label: "Thumbnail"
+        name: "thumbnail"
+        widget: "image"
+        required: false
+        media_folder: "/public/uploads/blog"
+        public_folder: "/uploads/blog"
+        
+      - label: "Excerpt"
+        name: "excerpt"
+        widget: "text"
+        required: true
+        hint: "A short summary shown in blog listings (1-2 sentences)"
+        
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+        required: true
+        
+      - label: "Draft"
+        name: "draft"
+        widget: "boolean"
+        default: true
+        hint: "Draft posts are hidden in production"
+
+  # Projects
+  - name: "projects"
+    label: "Projects"
+    folder: "src/content/projects"
+    create: true
+    slug: "{{slug}}"
+    preview_path: "projects"
+    summary: "{{title}}"
+    sortable_fields: ['title', 'order']
+    fields:
+      - label: "Title"
+        name: "title"
+        widget: "string"
+        required: true
+        
+      - label: "Description"
+        name: "description"
+        widget: "text"
+        required: true
+        hint: "Briefly describe what the project does"
+        
+      - label: "Thumbnail"
+        name: "thumbnail"
+        widget: "image"
+        required: false
+        media_folder: "/public/uploads/projects"
+        public_folder: "/uploads/projects"
+        
+      - label: "Tags"
+        name: "tags"
+        widget: "list"
+        required: false
+        hint: "Technologies used (e.g., PyTorch, React, etc.)"
+        
+      - label: "GitHub URL"
+        name: "github"
+        widget: "string"
+        required: false
+        
+      - label: "Demo URL"
+        name: "demo"
+        widget: "string"
+        required: false
+        
+      - label: "Paper URL"
+        name: "paper"
+        widget: "string"
+        required: false
+        
+      - label: "Featured"
+        name: "featured"
+        widget: "boolean"
+        default: false
+        hint: "Featured projects appear first"
+        
+      - label: "Display Order"
+        name: "order"
+        widget: "number"
+        default: 0
+        required: false
+        hint: "Lower numbers appear first"
+        
+      - label: "Body (optional)"
+        name: "body"
+        widget: "markdown"
+        required: false
+        hint: "Detailed project description"
+
+  # Site Settings
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - name: "general"
+        label: "General Settings"
+        file: "src/content/settings/general.json"
+        fields:
+          - label: "Site Title"
+            name: "siteTitle"
+            widget: "string"
+            default: "AI Engineer Portfolio"
+            
+          - label: "Site Description"
+            name: "siteDescription"
+            widget: "text"
+            
+          - label: "Author Name"
+            name: "authorName"
+            widget: "string"
+            
+          - label: "Author Email"
+            name: "authorEmail"
+            widget: "string"
