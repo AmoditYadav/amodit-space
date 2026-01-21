@@ -98,9 +98,9 @@ export default async function BlogPostPage({ params }: Props) {
                 {post.coverImage && (
                     <div className="mb-8 rounded-lg overflow-hidden">
                         <img
-                            src={urlFor(post.coverImage).width(1200).height(630).url()}
+                            src={urlFor(post.coverImage).width(1200).url()}
                             alt=""
-                            className="w-full"
+                            className="w-full h-auto"
                         />
                     </div>
                 )}
@@ -116,7 +116,7 @@ export default async function BlogPostPage({ params }: Props) {
                             : 'Draft'}
                     </time>
                     <h1 className="text-4xl font-bold text-white mb-4">{post.title}</h1>
-                    {post.excerpt && <p className="text-xl text-white/60">{post.excerpt}</p>}
+                    {post.excerpt && <p className="text-xl text-white/60 whitespace-pre-line">{post.excerpt}</p>}
                 </header>
 
                 <div className="prose prose-invert max-w-none">

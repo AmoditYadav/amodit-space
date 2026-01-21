@@ -150,7 +150,7 @@ export default async function AboutPage() {
                                     <p className="text-white/60 text-sm mb-2">
                                         {exp.company} • {exp.period}
                                     </p>
-                                    <p className="text-white/70">{exp.description}</p>
+                                    <p className="text-white/70 whitespace-pre-line">{exp.description}</p>
                                 </div>
                             ))}
                         </div>
