@@ -12,11 +12,63 @@ export const project = defineType({
             validation: (Rule) => Rule.required(),
         }),
         defineField({
+            name: 'slug',
+            title: 'Slug',
+            type: 'slug',
+            options: {
+                source: 'title',
+                maxLength: 96,
+            },
+            validation: (Rule) => Rule.required(),
+        }),
+        defineField({
             name: 'description',
             title: 'Description',
             type: 'text',
             rows: 4,
             validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+            name: 'body',
+            title: 'Body',
+            type: 'array',
+            of: [
+                {
+                    type: 'block',
+                    styles: [
+                        { title: 'Normal', value: 'normal' },
+                        { title: 'H2', value: 'h2' },
+                        { title: 'H3', value: 'h3' },
+                        { title: 'H4', value: 'h4' },
+                        { title: 'Quote', value: 'blockquote' },
+                    ],
+                    marks: {
+                        decorators: [
+                            { title: 'Bold', value: 'strong' },
+                            { title: 'Italic', value: 'em' },
+                            { title: 'Code', value: 'code' },
+                        ],
+                        annotations: [
+                            {
+                                name: 'link',
+                                type: 'object',
+                                title: 'Link',
+                                fields: [
+                                    {
+                                        name: 'href',
+                                        type: 'url',
+                                        title: 'URL',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+                {
+                    type: 'image',
+                    options: { hotspot: true },
+                },
+            ],
         }),
         defineField({
             name: 'tags',

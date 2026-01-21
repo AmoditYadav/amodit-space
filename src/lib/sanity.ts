@@ -102,7 +102,9 @@ export async function getProjects() {
     return await client.fetch(`
       *[_type == "project"] | order(order asc) {
         _id,
+        _id,
         title,
+        "slug": slug.current,
         description,
         tags,
         thumbnail,
@@ -112,6 +114,59 @@ export async function getProjects() {
         featured
       }
     `);
+  } catch {
+    return [];
+  }
+}
+
+export async function getProject(slug: string) {
+  if (!isSanityConfigured) return null;
+
+  try {
+    // Try to fetch by exact slug first
+    const project = await client.fetch(
+      `
+      *[_type == "project" && slug.current == $slug][0] {
+        _id,
+        title,
+        "slug": slug.current,
+        description,
+        body,
+        tags,
+        thumbnail,
+        githubUrl,
+        demoUrl,
+        paperUrl
+      }
+    `,
+      { slug }
+    );
+
+    if (project) return project;
+
+    // Fallback: If no project found by slug, it might be a legacy project without a slug field.
+    // fetch all projects and match by slugified title
+    const allProjects = await getProjects();
+    return allProjects.find((p: any) => {
+      const generatedSlug = p.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      return generatedSlug === slug || p.slug === slug;
+    }) || null;
+
+  } catch {
+    return null;
+  }
+}
+
+export async function getProjectSlugs() {
+  if (!isSanityConfigured) return [];
+
+  try {
+    const projects = await client.fetch(`
+      *[_type == "project"] { "slug": slug.current, title }
+    `);
+
+    // Return explicit slugs OR generated slugs for legacy items
+    return projects.map((p: any) => p.slug || p.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''));
   } catch {
     return [];
   }

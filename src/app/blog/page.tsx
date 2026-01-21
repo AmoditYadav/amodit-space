@@ -32,11 +32,10 @@ export default async function BlogPage() {
                 ) : (
                     <div className="space-y-8">
                         {posts.map((post) => (
-                            <article
-                                key={post._id}
-                                className="group border border-white/10 rounded-lg p-6 hover:border-white/20 transition-colors bg-white/[0.02]"
-                            >
-                                <Link href={`/blog/${post.slug}`}>
+                            <Link href={`/blog/${post.slug}`} key={post._id} className="block group">
+                                <article
+                                    className="border border-white/10 rounded-lg p-6 hover:border-white/20 transition-colors bg-white/[0.02]"
+                                >
                                     <div className="flex gap-6">
                                         {post.coverImage && (
                                             <div className="hidden sm:block w-32 h-24 rounded-md overflow-hidden flex-shrink-0">
@@ -65,8 +64,8 @@ export default async function BlogPage() {
                                             )}
                                         </div>
                                     </div>
-                                </Link>
-                            </article>
+                                </article>
+                            </Link>
                         ))}
                     </div>
                 )}
