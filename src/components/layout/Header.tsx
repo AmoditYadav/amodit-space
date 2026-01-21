@@ -54,8 +54,8 @@ export function Header() {
         <>
             <header
                 className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || isMenuOpen
-                        ? 'bg-black/80 backdrop-blur-md border-b border-white/10'
-                        : 'bg-transparent'
+                    ? 'bg-black/80 backdrop-blur-md border-b border-white/10'
+                    : 'bg-transparent'
                     }`}
             >
                 <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,7 +67,7 @@ export function Header() {
                             aria-label="Home"
                         >
                             <span className="text-xl">✦</span>
-                            <span className="ml-2 hidden sm:inline">Portfolio</span>
+                            <span className="ml-2 hidden sm:inline">Amodit Yadav</span>
                         </Link>
 
                         {/* Desktop Navigation */}
@@ -77,8 +77,8 @@ export function Header() {
                                     key={link.href}
                                     href={link.href}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${isActive(link.href)
-                                            ? 'text-white bg-white/10'
-                                            : 'text-white/70 hover:text-white hover:bg-white/5'
+                                        ? 'text-white bg-white/10'
+                                        : 'text-white/70 hover:text-white hover:bg-white/5'
                                         }`}
                                     aria-current={isActive(link.href) ? 'page' : undefined}
                                 >
@@ -144,8 +144,8 @@ export function Header() {
                                 key={link.href}
                                 href={link.href}
                                 className={`px-4 py-3 rounded-xl text-lg font-medium transition-all ${isActive(link.href)
-                                        ? 'text-white bg-white/15'
-                                        : 'text-white/70 hover:text-white hover:bg-white/5'
+                                    ? 'text-white bg-white/15'
+                                    : 'text-white/70 hover:text-white hover:bg-white/5'
                                     }`}
                                 aria-current={isActive(link.href) ? 'page' : undefined}
                             >
