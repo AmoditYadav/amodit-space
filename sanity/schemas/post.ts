@@ -81,20 +81,6 @@ export const post = defineType({
                     type: 'image',
                     options: { hotspot: true },
                 },
-                {
-                    type: 'code',
-                    title: 'Code Block',
-                    options: {
-                        language: 'typescript',
-                        languageAlternatives: [
-                            { title: 'TypeScript', value: 'typescript' },
-                            { title: 'JavaScript', value: 'javascript' },
-                            { title: 'Python', value: 'python' },
-                            { title: 'Bash', value: 'bash' },
-                            { title: 'JSON', value: 'json' },
-                        ],
-                    },
-                },
             ],
         }),
         defineField({
