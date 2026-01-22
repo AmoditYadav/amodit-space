@@ -132,10 +132,12 @@ export default async function ContactPage() {
 function ContactForm() {
     return (
         <form
-            action="https://formspree.io/f/your-form-id"
+            action="https://usebasin.com/f/737e9ea324c0"
             method="POST"
             className="space-y-6"
         >
+            <input type="text" name="honeypot" style={{ display: "none" }} />
+            <input type="hidden" name="_subject" value="New message from amodit.space" />
             <div>
                 <label htmlFor="name" className="block text-sm font-medium text-white/80 mb-2">
                     Name
