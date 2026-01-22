@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,17 +13,17 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "AI Engineer Portfolio",
-    template: "%s | AI Engineer Portfolio",
+    default: "Amodit's",
+    template: "%s | Amodit's",
   },
-  description: "Personal portfolio of an AI Engineer showcasing projects, blog posts, and expertise in artificial intelligence and machine learning.",
-  keywords: ["AI Engineer", "Machine Learning", "Deep Learning", "Portfolio", "Software Engineer"],
-  authors: [{ name: "AI Engineer" }],
-  creator: "AI Engineer",
+  description: "Personal portfolio of Amodit Yadav showcasing projects, blog posts, and expertise in artificial intelligence and machine learning.",
+  keywords: ["Amodit Yadav", "AI Engineer", "Machine Learning", "Deep Learning", "Portfolio", "Software Engineer"],
+  authors: [{ name: "Amodit Yadav" }],
+  creator: "Amodit Yadav",
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "AI Engineer Portfolio",
+    siteName: "Amodit Yadav",
   },
   twitter: {
     card: "summary_large_image",
@@ -41,6 +42,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased bg-black text-white">
+        {/* Loader: Initialises site */}
+        <LoadingScreen minDuration={2500} />
+
         {/* Skip link for accessibility */}
         <a href="#main-content" className="skip-link">
           Skip to main content

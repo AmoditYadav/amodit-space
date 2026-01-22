@@ -176,3 +176,30 @@ No manual redeploy needed. ISR handles it automatically.
 For CMS issues: [sanity.io/docs](https://www.sanity.io/docs)
 
 For website issues: Check the repository README or open a GitHub issue.
+
+---
+
+## 📄 Replacing the CV
+
+1. Rename your CV file to `resume.pdf`
+2. Replace the file at `public/cv/resume.pdf`
+3. Commit and push — Vercel will auto-deploy
+
+---
+
+## 🚀 Disabling the Loading Screen
+
+For development or presentations, you can disable the black hole loader:
+
+1. Open `src/app/layout.tsx`
+2. Comment out `<LoadingScreen ... />`
+3. The site will load directly without the animation
+
+## 🖼️ Replacing the Loader Fallback
+
+The loader displays a static image on low-end devices or when "reduced motion" is enabled.
+To change it:
+1. Replace `public/assets/loader/blackhole_baked.jpg` (Must be a JPEG or highly compressed image)
+2. Ensure the file size is small (<100KB recommended)
+
+

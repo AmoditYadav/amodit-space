@@ -1,0 +1,172 @@
+.container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    /* Position at bottom */
+    padding-bottom: 5rem;
+    /* Space from bottom edge */
+    overflow: hidden;
+    background-color: #000;
+}
+
+/* Stars background - static dots */
+.stars {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+        radial-gradient(1px 1px at 40px 70px, #fff, transparent),
+        radial-gradient(1px 1px at 50px 160px, #fff, transparent),
+        radial-gradient(1px 1px at 80px 120px, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 110px 40px, #fff, transparent),
+        radial-gradient(1px 1px at 130px 100px, #fff, transparent),
+        radial-gradient(1px 1px at 170px 60px, #fff, transparent),
+        radial-gradient(1px 1px at 200px 30px, #fff, transparent);
+    background-size: 250px 250px;
+    background-repeat: repeat;
+    opacity: 0.3;
+}
+
+/* Rocket container handles the upward movement */
+.rocketWrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: launch 2.5s cubic-bezier(0.5, 0, 0.5, 1) forwards;
+    will-change: transform;
+}
+
+/* SVG style */
+.rocketSvg {
+    width: 40px;
+    height: auto;
+    fill: #e5e5e5;
+    /* Light grey body */
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+}
+
+/* Flame - positioned absolute below the rocket */
+.flame {
+    position: absolute;
+    top: 100%;
+    /* Below rocket */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 20px;
+    background: linear-gradient(to bottom, #ff9d00, #ff4500, transparent);
+    border-radius: 50% 50% 20% 20%;
+    animation: flicker 0.1s infinite alternate;
+    opacity: 0.8;
+    margin-top: -2px;
+    /* Connect to engine */
+}
+
+/* Smoke trail - optional subtle effect */
+.smoke {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 100px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+    filter: blur(4px);
+    margin-top: 10px;
+    opacity: 0;
+    animation: smokeFade 2.5s ease-in forwards;
+}
+
+/* Launch Animation: Start low, go up */
+@keyframes launch {
+    0% {
+        transform: translateY(100px);
+        /* Start slightly visible at bottom or just below text */
+    }
+
+    100% {
+        transform: translateY(-80vh);
+        /* Exit upward cleanly */
+    }
+}
+
+/* Flame Flicker */
+@keyframes flicker {
+    0% {
+        transform: translateX(-50%) scale(1);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: translateX(-50%) scale(0.9, 1.1);
+        opacity: 0.7;
+    }
+}
+
+/* Smoke opacity ramp up */
+@keyframes smokeFade {
+    0% {
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 0;
+    }
+
+    /* Fade out as it goes high */
+}
+
+/* Text Container */
+.statusText {
+    position: fixed;
+    bottom: 2rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: var(--font-inter, sans-serif);
+    font-size: 0.85rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    width: 100%;
+    pointer-events: none;
+}
+
+/* Responsive adjust */
+@media (max-width: 640px) {
+    .rocketSvg {
+        width: 32px;
+    }
+
+    .statusText {
+        bottom: 3rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+    .rocketWrapper {
+        animation: none;
+        transform: translateY(0);
+        /* Static center */
+    }
+
+    .flame,
+    .smoke {
+        display: none;
+        /* No flicker */
+    }
+}
