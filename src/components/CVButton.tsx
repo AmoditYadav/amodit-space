@@ -14,7 +14,7 @@ export function CVButton() {
         setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
 
         // HEAD request to check if CV exists
-        fetch('/cv/resume.pdf', { method: 'HEAD' })
+        fetch('/cv/Amodit_cv_2026.pdf', { method: 'HEAD' })
             .then((res) => {
                 setIsAvailable(res.ok);
             })
@@ -115,7 +115,7 @@ export function CVButton() {
         <>
             <style>{hoverStyles}</style>
             <a
-                href="/cv/resume.pdf"
+                href="/cv/Amodit_cv_2026.pdf"
                 download
                 target="_blank"
                 rel="noopener noreferrer"
