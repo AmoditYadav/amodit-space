@@ -184,7 +184,8 @@ export async function getAbout() {
         profileImage,
         bio,
         skills,
-        experience
+        experience,
+        "resumeUrl": resume.asset->url
       }
     `);
   } catch {

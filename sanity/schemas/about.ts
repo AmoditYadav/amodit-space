@@ -13,6 +13,14 @@ export const about = defineType({
             initialValue: 'About Me',
         }),
         defineField({
+            name: 'resume',
+            title: 'Resume/CV',
+            type: 'file',
+            options: {
+                accept: '.pdf',
+            },
+        }),
+        defineField({
             name: 'profileImage',
             title: 'Profile Image',
             type: 'image',

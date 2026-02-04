@@ -9,18 +9,41 @@ export function CVButton() {
     const [isAvailable, setIsAvailable] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
 
+    const [resumeUrl, setResumeUrl] = useState<string>('/cv/Amodit_cv_2026.pdf');
+    const [isInternal, setIsInternal] = useState(true); // Track if using internal file
+
     // Check if CV file exists and detect mobile
     useEffect(() => {
         setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
 
-        // HEAD request to check if CV exists
-        fetch('/cv/Amodit_cv_2026.pdf', { method: 'HEAD' })
-            .then((res) => {
+        const checkResume = async () => {
+            try {
+                // 1. Try fetching from Sanity
+                // dynamic import client to avoid server-side issues if any, though standard import is fine usually
+                const { client } = await import('@/lib/sanity');
+                const sanityUrl = await client.fetch(`*[_type == "about"][0].resume.asset->url`);
+
+                if (sanityUrl) {
+                    setResumeUrl(sanityUrl);
+                    setIsAvailable(true);
+                    setIsInternal(false);
+                    return;
+                }
+            } catch (error) {
+                console.warn("Failed to fetch resume from Sanity:", error);
+            }
+
+            // 2. Fallback to local file
+            try {
+                const res = await fetch('/cv/Amodit_cv_2026.pdf', { method: 'HEAD' });
                 setIsAvailable(res.ok);
-            })
-            .catch(() => {
+                if (res.ok) setResumeUrl('/cv/Amodit_cv_2026.pdf');
+            } catch {
                 setIsAvailable(false);
-            });
+            }
+        };
+
+        checkResume();
 
         // Listen for resize
         const handleResize = () => {
@@ -115,8 +138,8 @@ export function CVButton() {
         <>
             <style>{hoverStyles}</style>
             <a
-                href="/cv/Amodit_cv_2026.pdf"
-                download
+                href={resumeUrl}
+                download={isInternal} // Only use download attribute for internal files to avoid CORS issues or just to be safe
                 target="_blank"
                 rel="noopener noreferrer"
                 className="cv-button"
