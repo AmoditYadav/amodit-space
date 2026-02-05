@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { PortableText } from '@portabletext/react';
-import { getProject, getProjectSlugs, urlFor } from '@/lib/sanity';
+import { getProject, getProjectSlugs, urlFor, projectId, dataset } from '@/lib/sanity';
 import type { Metadata } from 'next';
 
 export const revalidate = 60;
@@ -40,6 +40,29 @@ const portableTextComponents = {
                 />
             </figure>
         ),
+        file: ({ value }: { value: { asset: { _ref: string }; description?: string } }) => {
+            if (!value?.asset?._ref) return null;
+
+            // Construct file URL from asset ref
+            // Ref format: file-123...456-mp4
+            const ref = value.asset._ref;
+            const [_file, id, extension] = ref.split('-');
+            const url = `https://cdn.sanity.io/files/${projectId}/${dataset}/${id}.${extension}`;
+
+            return (
+                <figure className="my-8">
+                    <video controls className="w-full rounded-lg">
+                        <source src={url} type={`video/${extension}`} />
+                        Your browser does not support the video tag.
+                    </video>
+                    {value.description && (
+                        <figcaption className="text-center text-white/50 text-sm mt-2">
+                            {value.description}
+                        </figcaption>
+                    )}
+                </figure>
+            );
+        },
     },
     marks: {
         link: ({ children, value }: { children: React.ReactNode; value?: { href: string } }) => (
@@ -95,7 +118,7 @@ export default async function ProjectPage({ params }: Props) {
                     <span className="mr-2">←</span> Back to Projects
                 </Link>
 
-                {project.thumbnail && (
+                {project.thumbnail?.asset?._ref && (
                     <div className="mb-8 rounded-lg overflow-hidden border border-white/10 bg-black/50">
                         <img
                             src={urlFor(project.thumbnail).width(1200).url()}

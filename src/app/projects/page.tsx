@@ -50,7 +50,7 @@ export default async function ProjectsPage() {
                                         className="absolute inset-0 z-10"
                                         aria-label={`View project: ${project.title}`}
                                     />
-                                    {project.thumbnail && (
+                                    {project.thumbnail?.asset?._ref && (
                                         <div className="aspect-video overflow-hidden flex-shrink-0">
                                             <img
                                                 src={urlFor(project.thumbnail).width(600).height(340).url()}
