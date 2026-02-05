@@ -68,6 +68,18 @@ export const project = defineType({
                     type: 'image',
                     options: { hotspot: true },
                 },
+                {
+                    type: 'file',
+                    title: 'Video',
+                    options: { accept: 'video/*' },
+                    fields: [
+                        {
+                            name: 'description',
+                            title: 'Description',
+                            type: 'string',
+                        },
+                    ],
+                },
             ],
         }),
         defineField({

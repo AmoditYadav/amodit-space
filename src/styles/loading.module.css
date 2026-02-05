@@ -1,7 +1,7 @@
 .loaderContainer {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: 999999;
     background-color: #000;
     display: flex;
     flex-direction: column;
