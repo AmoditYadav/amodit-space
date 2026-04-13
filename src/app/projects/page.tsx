@@ -14,6 +14,8 @@ interface Project {
     demoUrl?: string;
     paperUrl?: string;
     featured?: boolean;
+    sourceCodeUrl?: string;
+    demoVideoUrl?: string;
 }
 
 export default async function ProjectsPage() {
@@ -110,6 +112,14 @@ export default async function ProjectsPage() {
                                                     className="text-sm text-white/60 hover:text-white transition-colors"
                                                 >
                                                     Paper →
+                                                </a>
+                                            )}
+                                            {project.sourceCodeUrl && (
+                                                <a
+                                                    href={project.sourceCodeUrl + "?dl="}
+                                                    className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                                                >
+                                                    Download ↓
                                                 </a>
                                             )}
                                         </div>

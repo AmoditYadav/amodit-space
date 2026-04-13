@@ -178,12 +178,30 @@ export default async function ProjectPage({ params }: Props) {
                                 <span className="text-white/50">↗</span>
                             </a>
                         )}
+                        {project.sourceCodeUrl && (
+                            <a
+                                href={project.sourceCodeUrl + "?dl="}
+                                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-md transition-colors flex items-center gap-2"
+                            >
+                                <span>Download Code / Files</span>
+                                <span className="text-white/50">↓</span>
+                            </a>
+                        )}
                     </div>
 
                     <div className="text-lg text-white/80 leading-relaxed border-b border-white/10 pb-8 mb-8 whitespace-pre-line">
                         {project.description}
                     </div>
                 </header>
+
+                {project.demoVideoUrl && (
+                    <figure className="mb-8 rounded-lg overflow-hidden border border-white/10 bg-black/50">
+                        <video controls className="w-full h-auto aspect-video">
+                            <source src={project.demoVideoUrl} />
+                            Your browser does not support the video tag.
+                        </video>
+                    </figure>
+                )}
 
                 {project.body && (
                     <div className="prose prose-invert max-w-none">

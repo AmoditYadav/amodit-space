@@ -111,7 +111,9 @@ export async function getProjects() {
         githubUrl,
         demoUrl,
         paperUrl,
-        featured
+        featured,
+        "sourceCodeUrl": sourceCode.asset->url,
+        "demoVideoUrl": demoVideo.asset->url
       }
     `);
   } catch {
@@ -136,7 +138,9 @@ export async function getProject(slug: string) {
         thumbnail,
         githubUrl,
         demoUrl,
-        paperUrl
+        paperUrl,
+        "sourceCodeUrl": sourceCode.asset->url,
+        "demoVideoUrl": demoVideo.asset->url
       }
     `,
       { slug }

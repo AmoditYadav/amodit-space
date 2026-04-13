@@ -83,6 +83,24 @@ export const project = defineType({
             ],
         }),
         defineField({
+            name: 'demoVideo',
+            title: 'Demonstration Video',
+            type: 'file',
+            options: {
+                accept: 'video/*',
+            },
+            description: 'Upload a small demonstration video',
+        }),
+        defineField({
+            name: 'sourceCode',
+            title: 'Source Code / Project Files',
+            type: 'file',
+            description: 'Upload a zip or small code file for users to download',
+            options: {
+                storeOriginalFilename: true,
+            }
+        }),
+        defineField({
             name: 'tags',
             title: 'Tags',
             type: 'array',
