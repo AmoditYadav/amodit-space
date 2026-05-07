@@ -3,7 +3,6 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { AudioPlayer } from "@/components/AudioPlayer";
-import { LoadingScreen } from "@/components/LoadingScreen";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -19,8 +18,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Amodit Yadav — AI & Aerospace Engineer",
-    template: "%s | Amodit Yadav",
+    default: "Amodit's",
+    template: "%s | Amodit's",
   },
   description:
     "Personal portfolio of Amodit Yadav — AI and aerospace engineering student building intelligent systems for the future.",
@@ -56,8 +55,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
       <body className="antialiased bg-black text-white">
-        {/* Cinematic loading screen */}
-        <LoadingScreen minDuration={3500} />
 
         {/* Skip link for accessibility */}
         <a href="#main-content" className="skip-link">
