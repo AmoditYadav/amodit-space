@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { LoadingScreen } from "@/components/LoadingScreen";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-space-grotesk",
+});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,11 +19,19 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Amodit's",
-    template: "%s | Amodit's",
+    default: "Amodit Yadav — AI & Aerospace Engineer",
+    template: "%s | Amodit Yadav",
   },
-  description: "Personal portfolio of Amodit Yadav showcasing projects, blog posts, and expertise in artificial intelligence and machine learning.",
-  keywords: ["Amodit Yadav", "AI Engineer", "Machine Learning", "Deep Learning", "Portfolio", "Software Engineer"],
+  description:
+    "Personal portfolio of Amodit Yadav — AI and aerospace engineering student building intelligent systems for the future.",
+  keywords: [
+    "Amodit Yadav",
+    "AI Engineer",
+    "Aerospace",
+    "Machine Learning",
+    "Deep Learning",
+    "Portfolio",
+  ],
   authors: [{ name: "Amodit Yadav" }],
   creator: "Amodit Yadav",
   openGraph: {
@@ -40,10 +54,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
       <body className="antialiased bg-black text-white">
-        {/* Loader: Initialises site */}
-        <LoadingScreen minDuration={2500} />
+        {/* Cinematic loading screen */}
+        <LoadingScreen minDuration={3500} />
 
         {/* Skip link for accessibility */}
         <a href="#main-content" className="skip-link">
@@ -54,9 +68,7 @@ export default function RootLayout({
         <Header />
 
         {/* Main content */}
-        <main id="main-content">
-          {children}
-        </main>
+        <main id="main-content">{children}</main>
 
         {/* Audio player */}
         <AudioPlayer />

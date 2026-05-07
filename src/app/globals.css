@@ -3,33 +3,37 @@
 :root {
   --background: #000000;
   --foreground: #ededed;
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --accent: #6B9FD4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 }
 
-/* Custom scrollbar */
+/* ─── Custom scrollbar ────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Base styles */
+/* ─── Base styles ─────────────────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
 }
@@ -56,18 +60,56 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Safe area for mobile devices */
+/* ─── Glassmorphism utilities ─────────────────────────────────────────────── */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+.glass-panel-hover:hover {
+  background: var(--glass-bg-hover);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Section label style (NASA-inspired) ─────────────────────────────────── */
+.section-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 400;
+}
+
+/* ─── Safe area for mobile devices ────────────────────────────────────────── */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-/* Focus styles for accessibility */
+/* ─── Focus styles for accessibility ──────────────────────────────────────── */
 *:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline: 2px solid rgba(255, 255, 255, 0.4);
   outline-offset: 2px;
 }
 
-/* Skip link for accessibility */
+/* ─── Skip link for accessibility ─────────────────────────────────────────── */
 .skip-link {
   position: absolute;
   top: -100%;
@@ -85,13 +127,13 @@ body {
   top: 1rem;
 }
 
-/* Page content wrapper */
+/* ─── Page content wrapper ────────────────────────────────────────────────── */
 .page-content {
   min-height: 100vh;
   padding-top: 4rem;
 }
 
-/* Prose styles for blog content */
+/* ─── Prose styles for blog content ───────────────────────────────────────── */
 .prose {
   max-width: 65ch;
   color: rgba(255, 255, 255, 0.85);
@@ -103,6 +145,7 @@ body {
 .prose h4 {
   color: white;
   font-weight: 600;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
 }
 
 .prose h1 {
@@ -131,7 +174,7 @@ body {
 }
 
 .prose a {
-  color: #60a5fa;
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -187,4 +230,34 @@ body {
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin: 2rem 0;
+}
+
+/* ─── Cinematic title animation ───────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-up-delayed {
+  animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+/* ─── Subtle glow effect for interactive elements ─────────────────────────── */
+.glow-hover {
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 20px rgba(107, 159, 212, 0.15), 0 0 40px rgba(107, 159, 212, 0.05);
 }

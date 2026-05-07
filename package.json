@@ -10,19 +10,25 @@
   },
   "dependencies": {
     "@portabletext/react": "^6.0.2",
+    "@react-spring/three": "^10.0.3",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "@react-three/postprocessing": "^3.0.4",
     "@sanity/image-url": "^2.0.3",
     "@sanity/vision": "^5.5.0",
+    "framer-motion": "^12.38.0",
     "gray-matter": "^4.0.3",
+    "gsap": "^3.15.0",
     "next": "16.1.4",
     "next-sanity": "^12.0.14",
+    "postprocessing": "^6.39.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
     "sanity": "^5.5.0",
-    "three": "^0.182.0"
+    "three": "^0.182.0",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

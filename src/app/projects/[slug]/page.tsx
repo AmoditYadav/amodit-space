@@ -68,7 +68,7 @@ const portableTextComponents = {
         link: ({ children, value }: { children: React.ReactNode; value?: { href: string } }) => (
             <a
                 href={value?.href || '#'}
-                className="text-blue-400 hover:text-blue-300 underline"
+                className="text-[#6B9FD4] hover:text-[#93c5fd] underline underline-offset-2"
                 target="_blank"
                 rel="noopener noreferrer"
             >
@@ -81,7 +81,7 @@ const portableTextComponents = {
     },
     block: {
         h2: ({ children }: { children?: React.ReactNode }) => (
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">{children}</h2>
+            <h2 className="text-2xl font-semibold text-white mt-10 mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{children}</h2>
         ),
         h3: ({ children }: { children?: React.ReactNode }) => (
             <h3 className="text-xl font-semibold text-white mt-8 mb-3">{children}</h3>
@@ -113,7 +113,7 @@ export default async function ProjectPage({ params }: Props) {
             <article className="max-w-4xl mx-auto">
                 <Link
                     href="/projects"
-                    className="inline-flex items-center text-white/50 hover:text-white mb-8 transition-colors"
+                    className="inline-flex items-center text-white/40 hover:text-white/70 mb-8 transition-colors duration-300 text-sm"
                 >
                     <span className="mr-2">←</span> Back to Projects
                 </Link>
@@ -129,14 +129,14 @@ export default async function ProjectPage({ params }: Props) {
                 )}
 
                 <header className="mb-8">
-                    <h1 className="text-4xl font-bold text-white mb-4">{project.title}</h1>
+                    <h1 className="text-4xl font-semibold text-white mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{project.title}</h1>
 
                     {project.tags && project.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-6">
                             {project.tags.map((tag: string) => (
                                 <span
                                     key={tag}
-                                    className="px-2 py-0.5 text-xs bg-white/10 text-white/70 rounded"
+                                    className="px-2.5 py-0.5 text-[11px] bg-white/[0.06] text-white/50 rounded-md"
                                 >
                                     {tag}
                                 </span>
@@ -150,7 +150,7 @@ export default async function ProjectPage({ params }: Props) {
                                 href={project.githubUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors flex items-center gap-2"
+                                className="px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] text-white/80 rounded-lg transition-all duration-300 flex items-center gap-2 border border-white/[0.08]"
                             >
                                 <span>GitHub</span>
                                 <span className="text-white/50">↗</span>
@@ -161,7 +161,7 @@ export default async function ProjectPage({ params }: Props) {
                                 href={project.demoUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md transition-colors flex items-center gap-2"
+                                className="px-4 py-2 bg-[#6B9FD4]/20 hover:bg-[#6B9FD4]/30 text-[#6B9FD4] rounded-lg transition-all duration-300 flex items-center gap-2 border border-[#6B9FD4]/20"
                             >
                                 <span>Live Demo</span>
                                 <span className="text-white/50">↗</span>
@@ -172,7 +172,7 @@ export default async function ProjectPage({ params }: Props) {
                                 href={project.paperUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors flex items-center gap-2"
+                                className="px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] text-white/80 rounded-lg transition-all duration-300 flex items-center gap-2 border border-white/[0.08]"
                             >
                                 <span>Paper</span>
                                 <span className="text-white/50">↗</span>
@@ -181,7 +181,7 @@ export default async function ProjectPage({ params }: Props) {
                         {project.sourceCodeUrl && (
                             <a
                                 href={project.sourceCodeUrl + "?dl="}
-                                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-md transition-colors flex items-center gap-2"
+                                className="px-4 py-2 bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 rounded-lg transition-all duration-300 flex items-center gap-2 border border-purple-500/20"
                             >
                                 <span>Download Code / Files</span>
                                 <span className="text-white/50">↓</span>

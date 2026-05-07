@@ -3,111 +3,262 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { usePortfolioStore } from '@/store/usePortfolioStore';
+
+// Inline shader strings to avoid GLSL import issues with SSR
+const sunVertexShader = /* glsl */`
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vPosition;
+uniform float uTime;
+
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+float snoise(vec3 v) {
+  const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+  vec3 i = floor(v + dot(v, C.yyy));
+  vec3 x0 = v - i + dot(i, C.xxx);
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min(g.xyz, l.zxy);
+  vec3 i2 = max(g.xyz, l.zxy);
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy;
+  vec3 x3 = x0 - D.yyy;
+  i = mod289(i);
+  vec4 p = permute(permute(permute(
+    i.z + vec4(0.0, i1.z, i2.z, 1.0))
+    + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+    + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+  float n_ = 0.142857142857;
+  vec3 ns = n_ * D.wyz - D.xzx;
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_);
+  vec4 x = x_ * ns.x + ns.yyyy;
+  vec4 y = y_ * ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+  vec4 b0 = vec4(x.xy, y.xy);
+  vec4 b1 = vec4(x.zw, y.zw);
+  vec4 s0 = floor(b0)*2.0 + 1.0;
+  vec4 s1 = floor(b1)*2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+  vec3 p0 = vec3(a0.xy, h.x);
+  vec3 p1 = vec3(a0.zw, h.y);
+  vec3 p2 = vec3(a1.xy, h.z);
+  vec3 p3 = vec3(a1.zw, h.w);
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+}
+
+void main() {
+  vUv = uv;
+  vNormal = normalize(normalMatrix * normal);
+  float displacement = snoise(position * 2.0 + uTime * 0.15) * 0.04;
+  vec3 newPosition = position + normal * displacement;
+  vPosition = newPosition;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+}
+`;
+
+const sunFragmentShader = /* glsl */`
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vPosition;
+uniform float uTime;
+uniform float uIntensity;
+
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+float snoise(vec3 v) {
+  const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+  vec3 i = floor(v + dot(v, C.yyy));
+  vec3 x0 = v - i + dot(i, C.xxx);
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min(g.xyz, l.zxy);
+  vec3 i2 = max(g.xyz, l.zxy);
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy;
+  vec3 x3 = x0 - D.yyy;
+  i = mod289(i);
+  vec4 p = permute(permute(permute(
+    i.z + vec4(0.0, i1.z, i2.z, 1.0))
+    + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+    + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+  float n_ = 0.142857142857;
+  vec3 ns = n_ * D.wyz - D.xzx;
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_);
+  vec4 x = x_ * ns.x + ns.yyyy;
+  vec4 y = y_ * ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+  vec4 b0 = vec4(x.xy, y.xy);
+  vec4 b1 = vec4(x.zw, y.zw);
+  vec4 s0 = floor(b0)*2.0 + 1.0;
+  vec4 s1 = floor(b1)*2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+  vec3 p0 = vec3(a0.xy, h.x);
+  vec3 p1 = vec3(a0.zw, h.y);
+  vec3 p2 = vec3(a1.xy, h.z);
+  vec3 p3 = vec3(a1.zw, h.w);
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+}
+
+void main() {
+  float t = uTime * 0.12;
+  vec3 noiseCoord = vPosition * 3.0;
+  float n1 = snoise(noiseCoord + t) * 0.5;
+  float n2 = snoise(noiseCoord * 2.0 - t * 1.3) * 0.25;
+  float n3 = snoise(noiseCoord * 4.0 + t * 0.7) * 0.125;
+  float n4 = snoise(noiseCoord * 8.0 - t * 0.5) * 0.0625;
+  float noise = n1 + n2 + n3 + n4;
+
+  vec3 coreColor = vec3(1.0, 0.98, 0.9);
+  vec3 midColor  = vec3(1.0, 0.75, 0.3);
+  vec3 edgeColor = vec3(0.9, 0.35, 0.1);
+
+  float fresnel = 1.0 - dot(vNormal, vec3(0.0, 0.0, 1.0));
+  fresnel = pow(fresnel, 1.5);
+
+  float colorFactor = clamp(noise * 0.5 + 0.5 + fresnel * 0.3, 0.0, 1.0);
+  vec3 color = mix(coreColor, midColor, colorFactor);
+  color = mix(color, edgeColor, fresnel * 0.6);
+
+  float granulation = snoise(vPosition * 15.0 + t * 0.3) * 0.08;
+  color -= granulation;
+
+  float pulse = 1.0 + sin(uTime * 0.4) * 0.05 + sin(uTime * 1.1) * 0.03;
+  color *= pulse * uIntensity;
+
+  gl_FragColor = vec4(color * 1.2, 1.0);
+}
+`;
 
 interface SunProps {
-    position?: [number, number, number];
+  position?: [number, number, number];
 }
 
 export function Sun({ position = [0, 0, 0] }: SunProps) {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const lightRef = useRef<THREE.PointLight>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const lightRef = useRef<THREE.PointLight>(null);
+  const introComplete = usePortfolioStore((s) => s.introComplete);
 
-    // Create procedural noise texture for sun surface
-    const noiseTexture = useMemo(() => {
-        const size = 256;
-        const data = new Uint8Array(size * size * 4);
+  // Shader uniforms
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uIntensity: { value: 0 },
+    }),
+    []
+  );
 
-        for (let i = 0; i < size * size; i++) {
-            const x = (i % size) / size;
-            const y = Math.floor(i / size) / size;
+  // Animate shader + light
+  useFrame((state) => {
+    const elapsed = state.clock.elapsedTime;
+    uniforms.uTime.value = elapsed;
 
-            // Multi-octave noise for solar granulation
-            let noise = 0;
-            noise += Math.sin(x * 20 + y * 15) * 0.3;
-            noise += Math.sin(x * 40 - y * 35) * 0.2;
-            noise += Math.sin(x * 80 + y * 70) * 0.1;
-            noise += Math.random() * 0.1;
+    // Smooth intensity ramp during intro (0→1 over ~2 seconds)
+    const targetIntensity = introComplete ? 1.0 : Math.min(1.0, elapsed / 2.0);
+    uniforms.uIntensity.value += (targetIntensity - uniforms.uIntensity.value) * 0.05;
 
-            const intensity = 200 + noise * 55;
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.0005;
+    }
 
-            data[i * 4] = Math.min(255, intensity + 40);     // R - warm
-            data[i * 4 + 1] = Math.min(255, intensity);       // G
-            data[i * 4 + 2] = Math.min(255, intensity - 60);  // B - less blue
-            data[i * 4 + 3] = 255;
-        }
+    if (lightRef.current) {
+      const flicker =
+        Math.sin(elapsed * 0.4) * 0.1 + Math.sin(elapsed * 1.1) * 0.05;
+      lightRef.current.intensity = (450 + flicker * 50) * uniforms.uIntensity.value;
+    }
+  });
 
-        const texture = new THREE.DataTexture(data, size, size);
-        texture.needsUpdate = true;
-        return texture;
-    }, []);
+  return (
+    <group position={position}>
+      {/* Main sun mesh with custom shader */}
+      <mesh ref={meshRef}>
+        <sphereGeometry args={[1.5, 64, 64]} />
+        <shaderMaterial
+          vertexShader={sunVertexShader}
+          fragmentShader={sunFragmentShader}
+          uniforms={uniforms}
+          transparent={false}
+          toneMapped={false}
+        />
+      </mesh>
 
-    // Animate sun rotation and light flickering
-    useFrame((state) => {
-        if (meshRef.current) {
-            meshRef.current.rotation.y += 0.0008;
-        }
+      {/* Inner corona glow */}
+      <mesh>
+        <sphereGeometry args={[1.9, 32, 32]} />
+        <meshBasicMaterial
+          color="#FFAA33"
+          transparent
+          opacity={0.08}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
 
-        // Subtle light intensity variation
-        if (lightRef.current) {
-            const flicker = Math.sin(state.clock.elapsedTime * 0.4) * 0.15 +
-                Math.sin(state.clock.elapsedTime * 1.1) * 0.08;
-            lightRef.current.intensity = 800 + flicker * 100; // High intensity for physically correct lights
-        }
-    });
+      {/* Mid corona */}
+      <mesh>
+        <sphereGeometry args={[2.4, 32, 32]} />
+        <meshBasicMaterial
+          color="#FF8800"
+          transparent
+          opacity={0.04}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
 
-    return (
-        <group position={position}>
-            {/* Sun mesh */}
-            <mesh ref={meshRef}>
-                <sphereGeometry args={[1.5, 64, 64]} />
-                <meshBasicMaterial
-                    map={noiseTexture}
-                    color="#FFCC44"
-                    toneMapped={false}
-                />
-            </mesh>
+      {/* Outer halo */}
+      <mesh>
+        <sphereGeometry args={[3.2, 24, 24]} />
+        <meshBasicMaterial
+          color="#FF6600"
+          transparent
+          opacity={0.018}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
 
-            {/* Corona glow effect - inner */}
-            <mesh>
-                <sphereGeometry args={[1.85, 32, 32]} />
-                <meshBasicMaterial
-                    color="#FFAA33"
-                    transparent
-                    opacity={0.2}
-                    side={THREE.BackSide}
-                />
-            </mesh>
+      {/* Sun light */}
+      <pointLight
+        ref={lightRef}
+        color="#FFF8E8"
+        intensity={450}
+        distance={0}
+        decay={2}
+        castShadow={false}
+      />
 
-            {/* Outer glow */}
-            <mesh>
-                <sphereGeometry args={[2.3, 32, 32]} />
-                <meshBasicMaterial
-                    color="#FF8800"
-                    transparent
-                    opacity={0.08}
-                    side={THREE.BackSide}
-                />
-            </mesh>
-
-            {/* Primary sun light - high intensity for physically correct lighting */}
-            <pointLight
-                ref={lightRef}
-                color="#FFF8E8"
-                intensity={800}
-                distance={0} // Infinite distance
-                decay={2}    // Physically correct inverse-square falloff
-                castShadow={false}
-            />
-
-            {/* Soft ambient fill - simulates eye adaptation, prevents pitch black */}
-            <ambientLight intensity={0.25} color="#6b7280" />
-
-            {/* Hemisphere light for subtle environmental fill */}
-            <hemisphereLight
-                color="#ffffff"
-                groundColor="#1a1a2e"
-                intensity={0.15}
-            />
-        </group>
-    );
+      {/* Ambient fills */}
+      <ambientLight intensity={0.2} color="#6b7280" />
+      <hemisphereLight color="#ffffff" groundColor="#1a1a2e" intensity={0.12} />
+    </group>
+  );
 }

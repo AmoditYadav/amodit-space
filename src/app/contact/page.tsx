@@ -61,10 +61,11 @@ export default async function ContactPage() {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 {/* Header */}
                 <section className="mb-12 text-center">
-                    <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+                    <p className="section-label mb-4">Contact</p>
+                    <h1 className="text-4xl sm:text-5xl font-semibold text-white mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                         {title}
                     </h1>
-                    <p className="text-xl text-white/70 max-w-2xl mx-auto">
+                    <p className="text-lg text-white/50 max-w-2xl mx-auto">
                         {subtitle}
                     </p>
                 </section>
@@ -79,8 +80,8 @@ export default async function ContactPage() {
 
                     {/* Contact Info */}
                     <section className={`space-y-8 ${!showForm ? 'md:col-span-2 max-w-xl mx-auto' : ''}`}>
-                        <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                            <h2 className="text-lg font-semibold text-white mb-4">Connect</h2>
+                        <div className="glass-panel p-6">
+                            <h2 className="text-base font-medium text-white mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Connect</h2>
 
                             <div className="space-y-4">
                                 {/* Email */}
@@ -115,7 +116,7 @@ export default async function ContactPage() {
 
                         {/* Availability Message */}
                         {contact?.availability && (
-                            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl p-6 border border-white/10">
+                            <div className="glass-panel p-6">
                                 <h2 className="text-lg font-semibold text-white mb-2">Availability</h2>
                                 <p className="text-white/60 text-sm">
                                     {contact.availability}
@@ -147,7 +148,7 @@ function ContactForm() {
                     id="name"
                     name="name"
                     required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/10 transition-colors"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-white/20 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10 transition-all duration-300"
                     placeholder="Your name"
                 />
             </div>
@@ -161,7 +162,7 @@ function ContactForm() {
                     id="email"
                     name="email"
                     required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/10 transition-colors"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-white/20 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10 transition-all duration-300"
                     placeholder="you@example.com"
                 />
             </div>
@@ -175,14 +176,14 @@ function ContactForm() {
                     name="message"
                     required
                     rows={5}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/10 transition-colors resize-none"
+                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder-white/20 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10 transition-all duration-300 resize-none"
                     placeholder="Tell me about your project or inquiry..."
                 />
             </div>
 
             <button
                 type="submit"
-                className="w-full px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
+                className="w-full px-6 py-3 bg-white/90 text-black font-medium rounded-xl hover:bg-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
             >
                 Send Message
             </button>

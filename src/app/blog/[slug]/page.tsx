@@ -45,7 +45,7 @@ const portableTextComponents = {
         link: ({ children, value }: { children: React.ReactNode; value?: { href: string } }) => (
             <a
                 href={value?.href || '#'}
-                className="text-blue-400 hover:text-blue-300 underline"
+                className="text-[#6B9FD4] hover:text-[#93c5fd] underline underline-offset-2"
                 target="_blank"
                 rel="noopener noreferrer"
             >
@@ -58,7 +58,7 @@ const portableTextComponents = {
     },
     block: {
         h2: ({ children }: { children?: React.ReactNode }) => (
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">{children}</h2>
+            <h2 className="text-2xl font-semibold text-white mt-10 mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{children}</h2>
         ),
         h3: ({ children }: { children?: React.ReactNode }) => (
             <h3 className="text-xl font-semibold text-white mt-8 mb-3">{children}</h3>
@@ -90,7 +90,7 @@ export default async function BlogPostPage({ params }: Props) {
             <article className="max-w-3xl mx-auto">
                 <Link
                     href="/blog"
-                    className="inline-flex items-center text-white/50 hover:text-white mb-8 transition-colors"
+                    className="inline-flex items-center text-white/40 hover:text-white/70 mb-8 transition-colors duration-300 text-sm"
                 >
                     <span className="mr-2">←</span> Back to Blog
                 </Link>
@@ -115,7 +115,7 @@ export default async function BlogPostPage({ params }: Props) {
                             })
                             : 'Draft'}
                     </time>
-                    <h1 className="text-4xl font-bold text-white mb-4">{post.title}</h1>
+                    <h1 className="text-4xl font-semibold text-white mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{post.title}</h1>
                     {post.excerpt && <p className="text-xl text-white/60 whitespace-pre-line">{post.excerpt}</p>}
                 </header>
 
