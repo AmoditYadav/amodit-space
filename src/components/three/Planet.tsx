@@ -52,6 +52,7 @@ export function Planet({ config, time, isMobile = false }: PlanetProps) {
 
   const setHoveredPlanet = usePortfolioStore((s) => s.setHoveredPlanet);
   const introComplete = usePortfolioStore((s) => s.introComplete);
+  const setZoomTarget = usePortfolioStore((s) => s.setZoomTarget);
 
   // Calculate current orbital position
   const position = useMemo(() => {
@@ -171,11 +172,12 @@ export function Planet({ config, time, isMobile = false }: PlanetProps) {
 
   const handleClick = useCallback(() => {
     if (!introComplete) return;
-    // Navigate after a brief delay to let camera start moving
-    setTimeout(() => {
-      router.push(config.route);
-    }, TIMING.planetClickDelay);
-  }, [router, config.route, introComplete]);
+    // Set zoom target — the CameraController will animate toward the planet
+    setZoomTarget({
+      position: position as [number, number, number],
+      route: config.route,
+    });
+  }, [introComplete, setZoomTarget, position, config.route]);
 
   const handlePointerOver = useCallback(() => {
     if (isMobile) return;
@@ -192,10 +194,8 @@ export function Planet({ config, time, isMobile = false }: PlanetProps) {
   }, [isMobile, setHoveredPlanet]);
 
   // Moon configuration — orbit radius in world coords, well outside planet surface
-  // Planet group is scaled so visual radius = ~1.0 in world space
-  // Moon orbits in world space at parentPosition + orbitRadius
-  const moonOrbitRadius = 1.8; // well outside the planet edge (radius ~1.0)
-  const moonSize = 0.12; // visible but proportional
+  const moonOrbitRadius = 1.8;
+  const moonSize = 0.12;
   const moonOrbitSpeed = 0.015;
 
   return (

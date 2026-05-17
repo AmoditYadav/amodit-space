@@ -163,6 +163,7 @@ export function Sun({ position = [0, 0, 0] }: SunProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
   const introComplete = usePortfolioStore((s) => s.introComplete);
+  const sunBrightness = usePortfolioStore((s) => s.sunBrightness);
 
   // Shader uniforms
   const uniforms = useMemo(
@@ -179,7 +180,9 @@ export function Sun({ position = [0, 0, 0] }: SunProps) {
     uniforms.uTime.value = elapsed;
 
     // Smooth intensity ramp during intro (0→1 over ~2 seconds)
-    const targetIntensity = introComplete ? 1.0 : Math.min(1.0, elapsed / 2.0);
+    // sunBrightness (0–1) acts as a user-controlled multiplier
+    const brightnessMultiplier = 0.3 + sunBrightness * 1.4; // range: 0.3–1.7
+    const targetIntensity = introComplete ? brightnessMultiplier : Math.min(brightnessMultiplier, (elapsed / 2.0) * brightnessMultiplier);
     uniforms.uIntensity.value += (targetIntensity - uniforms.uIntensity.value) * 0.05;
 
     if (meshRef.current) {

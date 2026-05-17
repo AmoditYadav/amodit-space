@@ -19,16 +19,19 @@ import * as THREE from 'three';
 function TimeManager({ children }: { children: (time: number) => React.ReactNode }) {
   const [time, setTime] = useState(0);
   const isMobile = usePortfolioStore((s) => s.isMobile);
+  const orbitSpeedMultiplier = usePortfolioStore((s) => s.orbitSpeedMultiplier);
 
-  return <TimeUpdater isMobile={isMobile} onTimeUpdate={setTime}>{children(time)}</TimeUpdater>;
+  return <TimeUpdater isMobile={isMobile} speedMultiplier={orbitSpeedMultiplier} onTimeUpdate={setTime}>{children(time)}</TimeUpdater>;
 }
 
 function TimeUpdater({ 
   isMobile, 
+  speedMultiplier,
   onTimeUpdate, 
   children 
 }: { 
   isMobile: boolean; 
+  speedMultiplier: number;
   onTimeUpdate: (t: number) => void; 
   children: React.ReactNode 
 }) {
@@ -36,7 +39,7 @@ function TimeUpdater({
   
   useFrame((_, delta) => {
     const speed = isMobile ? 0.06 : 0.1;
-    timeRef.current += delta * speed * 60;
+    timeRef.current += delta * speed * 60 * speedMultiplier;
     onTimeUpdate(timeRef.current);
   });
 

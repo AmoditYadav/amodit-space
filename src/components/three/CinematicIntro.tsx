@@ -6,11 +6,11 @@ import * as THREE from 'three';
 import { usePortfolioStore } from '@/store/usePortfolioStore';
 
 /**
- * Cinematic intro sequence — animates camera from far → overview,
- * then sets introComplete in the store.
+ * Cinematic intro sequence — two-phase animation:
+ * Phase 1: Camera starts far away and sweeps toward the sun (dramatic approach)
+ * Phase 2: Camera pulls back to the orbital overview position
  *
- * The intro uses manual camera interpolation (no GSAP dependency in the 3D scene)
- * to keep it lightweight. The effect runs for ~3.5 seconds.
+ * Works on both desktop and mobile with adjusted positions.
  */
 export function CinematicIntro() {
   const { camera } = useThree();
@@ -21,12 +21,15 @@ export function CinematicIntro() {
   const startTime = useRef(0);
   const hasStarted = useRef(false);
 
-  // Intro positions
-  const startPos = useRef(new THREE.Vector3(0, 2, 55));
+  // Three keyframes: start → close to sun → final overview
+  const startPos = useRef(new THREE.Vector3(0, 3, 55));
+  const midPos = useRef(new THREE.Vector3(5, 2, 8));     // close fly-by of the sun
   const endPos = useRef(new THREE.Vector3(18, 8, 18));
 
   useEffect(() => {
     if (isMobile) {
+      startPos.current.set(0, 4, 50);
+      midPos.current.set(4, 2.5, 10);     // still get the sun fly-by on mobile
       endPos.current.set(22, 10, 22);
     }
   }, [isMobile]);
@@ -41,25 +44,38 @@ export function CinematicIntro() {
     }
 
     const elapsed = state.clock.elapsedTime - startTime.current;
-    const duration = 3.5; // seconds
+    const totalDuration = 4.0; // total seconds
+    const midPoint = 0.45;     // 45% of time: approach sun, 55%: pull back
 
-    if (elapsed >= duration) {
+    if (elapsed >= totalDuration) {
       camera.position.copy(endPos.current);
       camera.lookAt(0, 0, 0);
       setIntroComplete(true);
       return;
     }
 
-    // Smooth easing (ease-in-out cubic)
-    let t = elapsed / duration;
-    t = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const t = elapsed / totalDuration;
 
-    // Interpolate position
-    camera.position.lerpVectors(startPos.current, endPos.current, t);
+    if (t <= midPoint) {
+      // Phase 1: sweep toward the sun
+      const phase1 = t / midPoint;
+      const eased = 1 - Math.pow(1 - phase1, 3); // ease-out
+      camera.position.lerpVectors(startPos.current, midPos.current, eased);
 
-    // Look at origin with slight vertical offset during intro
-    const lookOffset = (1 - t) * 1.5;
-    camera.lookAt(0, lookOffset, 0);
+      // Look slightly above the sun for dramatic framing
+      const lookY = (1 - eased) * 2;
+      camera.lookAt(0, lookY, 0);
+    } else {
+      // Phase 2: pull back to overview
+      const phase2 = (t - midPoint) / (1 - midPoint);
+      const eased = phase2 < 0.5
+        ? 4 * phase2 * phase2 * phase2
+        : 1 - Math.pow(-2 * phase2 + 2, 3) / 2; // ease-in-out
+      camera.position.lerpVectors(midPos.current, endPos.current, eased);
+
+      // Smooth look target transition
+      camera.lookAt(0, 0, 0);
+    }
   });
 
   return null;

@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { CVButton } from '@/components/CVButton';
+import { SandboxControls } from '@/components/SandboxControls';
 import { usePortfolioStore } from '@/store/usePortfolioStore';
 
 const SolarSystem = dynamic(
@@ -21,6 +22,9 @@ export default function Home() {
 
       {/* CV Download Button */}
       <CVButton />
+
+      {/* Sandbox controls — bottom-left */}
+      <SandboxControls />
 
       {/* Tagline below CV button */}
       <div
