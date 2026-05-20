@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+< lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Star Map with Real Solar Systems</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent;
+        }
+        .canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+        }
+        .label {
+            position: absolute;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            pointer-events: auto;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            user-select: none;
+            text-shadow: 0 0 5px black;
+            z-index: 2;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            display: none;
+        }
+        .planet-label {
+            position: absolute;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            pointer-events: none;
+            background: rgba(28, 37, 38, 0.8);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #C0C0C0;
+            user-select: none;
+            text-shadow: 0 0 3px black;
+            z-index: 3;
+        }
+        .habitable-zone {
+            position: absolute;
+            top: 120px;
+            left: 20px;
+            background: rgba(28, 37, 38, 0.6);
+            border: 2px solid #C0C0C0;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 14px;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+        }
+        .habitable-zone input[type="checkbox"] {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #C0C0C0;
+            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: pointer;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .habitable-zone input[type="checkbox"]:checked::before {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #C0C0C0;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .buttons-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(28, 37, 38, 0.8);
+            border: 2px solid #C0C0C0;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+            width: 144px;
+        }
+        .btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #C0C0C0;
+            background: rgba(28, 37, 38, 0.8);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            text-transform: uppercase;
+            border-radius: 4px;
+            position: relative;
+        }
+        .btn:hover {
+            background: rgba(192, 192, 192, 0.4);
+            box-shadow: 0 0 8px rgba(192, 192, 192, 0.7);
+        }
+        .btn::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 24px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin: 0 auto;
+        }
+        .btn:nth-child(1)::before {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 2a15 15 0 0 0 0 20M12 2a15 15 0 0 1 0 20M2 12h20M2 12a15 15 0 0 0 20 0M2 12a15 15 0 0 1 20 0"/></svg>');
+        }
+        .btn:nth-child(2)::before {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23C0C0C0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="5" fill="none" stroke-opacity="0.5"/><circle cx="12" cy="12" r="8" fill="none" stroke-opacity="0.3"/><circle cx="12" cy="12" r="11" fill="none" stroke-opacity="0.2"/><circle cx="17" cy="12" r="1" fill="%23C0C0C0"/><circle cx="7" cy="12" r="1" fill="%23C0C0C0"/><circle cx="12" cy="7" r="1" fill="%23C0C0C0"/><circle cx="12" cy="17" r="1" fill="%23C0C0C0"/></svg>');
+        }
+        .btn:nth-child(3)::before {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23C0C0C0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><polygon points="12 3 14 9 20 9 15 12 16 18 12 15 8 18 9 12 4 9 10 9"/></svg>');
+        }
+        .view-label {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .view-label::before,
+        .view-label::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: #C0C0C0;
+            margin: 0 8px;
+        }
+        .view-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .popup {
+            display: none !important; /* Default hidden */
+            position: absolute;
+            bottom: 100px; /* Above buttons-container */
+            right: 20px; /* Align with buttons-container */
+            background: rgba(28, 37, 38, 0.95);
+            border: 2px solid #C0C0C0;
+            border-radius: 6px;
+            padding: 12px;
+            color: #fff;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(192, 192, 192, 0.6);
+            z-index: 20; /* Above buttons-container (10) and canvas-container (0) */
+            width: 160px;
+            max-height: 200px;
+            font-weight: 500;
+            line-height: 1.5;
+            flex-direction: column;
+            overflow-y: auto;
+            pointer-events: auto; /* Allow interaction with popup content */
+        }
+        .popup a {
+            display: block;
+            padding: 8px 12px;
+            color: #C0C0C0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 2px 0;
+            pointer-events: auto;
+        }
+        .popup a:hover {
+            background: rgba(192, 192, 192, 0.3);
+            color: #fff;
+            box-shadow: 0 0 6px rgba(192, 192, 192, 0.5);
+        }
+        /* Explicitly prevent hover-based display for popup-trigger */
+        #popup-trigger:hover ~ .popup,
+        #popup-trigger:hover + .view-buttons ~ .popup,
+        .popup:hover {
+            display: none !important; /* Ensure popup doesn't show on hover */
+        }
+        /* Ensure popup only shows when explicitly set to flex via JavaScript */
+        .popup.active {
+            display: flex !important;
+        }
+    </style>
+</head>
+<>
+    <div class="canvas-container"></div>
+    <div class="habitable-zone">
+        <input type="checkbox" id="habitable-checkbox" checked> Habitable Zone
+    </div>
+    <div class="buttons-container">
+        <div class="view-label">VIEW</div>
+        <div class="view-buttons">
+            <button class="btn" id="popup-trigger"></button>
+            <button class="btn" id="view-btn-2"></button>
+            <button class="btn" id="view-btn-3"></button>
+        </div>
+        <div class="popup" id="popup">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <div class="back-button">Back to Galaxy</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.134.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://unpkg.com/three@0.134.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://unpkg.com/three@0.134.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://unpkg.com/three@0.134.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://unpkg.com/three@0.134.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://unpkg.com/three@0.134.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script>
+        // Scene setup for galaxy view
+        const galaxyScene = new THREE.Scene();
+        galaxyScene.background = new THREE.Color(0x000000);
+        const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 60000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        const canvasContainer = document.querySelector('.canvas-container');
+        canvasContainer.appendChild(renderer.domElement);
+
+        // Effect composer for UnrealBloom (used only for galaxy view)
+        const renderScene = new THREE.RenderPass(galaxyScene, camera);
+        const bloomPass = new THREE.UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            1.5, // Reduced strength for clearer visibility
+            0.6, // Radius
+            0.85 // Adjusted threshold
+        );
+        const composer = new THREE.EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        // Skybox
+        const skyboxGeometry = new THREE.SphereGeometry(30000, 64, 64);
+        const skyboxMaterial = new THREE.MeshBasicMaterial({
+            map: new THREE.TextureLoader().load('textures/8k_stars_milky_way.jpg'),
+            side: THREE.BackSide,
+            depthWrite: false,
+            depthTest: false
+        });
+        const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+        galaxyScene.add(skybox);
+
+        // Uniform star field distribution
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 10000;
+        const starPositions = new Float32Array(starCount * 3);
+        const maxStarRadius = 10000;
+        for (let i = 0; i < starCount * 3; i += 3) {
+            const theta = Math.random() * 2 * Math.PI;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const r = maxStarRadius * Math.cbrt(Math.random());
+            starPositions[i] = r * Math.sin(phi) * Math.cos(theta);
+            starPositions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+            starPositions[i + 2] = r * Math.cos(phi);
+        }
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starMaterial = new THREE.PointsMaterial({
+            color: 0xFFFFFF,
+            size: 0.5,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.2,
+            depthTest: true,
+            depthWrite: false
+        });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        stars.renderOrder = 1;
+        galaxyScene.add(stars);
+
+        // Add fog for blur effect, applied only to stars
+        const fog = new THREE.Fog(0x000000, 100, 10000);
+        galaxyScene.fog = fog;
+        skyboxMaterial.fog = false;
+
+        // OrbitControls for galaxy view
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.rotateSpeed = 0.5;
+        controls.enableZoom = true;
+        controls.minDistance = 1;
+        controls.maxDistance = 12000;
+        controls.enablePan = true;
+
+        // Solar systems with realistic coordinates
+        const solarSystems = [
+            { name: "Sol", distance: 0, x: 0, y: 0, z: 0 },
+            { name: "Proxima Centauri", distance: 4.24, x: -1.531, y: 0.849, z: -3.768 },
+            { name: "Barnard's Star", distance: 5.96, x: 5.822, y: -0.475, z: 0.488 },
+            { name: "Luyten's Star", distance: 12.36, x: 11.554, y: 4.196, z: 1.124 },
+            { name: "Teegarden's Star", distance: 12.5, x: 11.557, y: 8.496, z: 3.632 },
+            { name: "TRAPPIST-1", distance: 40.7, x: 39.943, y: -6.988, z: -3.577 },
+            { name: "HD 209458", distance: 159, x: 147.714, y: -48.322, z: 51.496 },
+            { name: "55 Cancri", distance: 41, x: 33.013, y: 14.966, z: 19.416 },
+            { name: "HD 189733", distance: 64.5, x: 54.814, y: -24.193, z: 24.908 },
+            { name: "Kepler-186", distance: 582, x: 429.771, y: -189.698, z: 402.076 },
+            { name: "Kepler-452", distance: 1800, x: 1321.000, y: -583.000, z: 1266.000 },
+            { name: "WASP-12", distance: 1410, x: 1197.000, y: 408.00, z: 698.000 },
+            { name: "Gliese 581", distance: 20.4, x: 18.058, y: 8.307, z: -2.737 },
+            { name: "HD 40307", distance: 42, x: 19.694, y: 3.769, z: -36.297 },
+            { name: "Kepler-22", distance: 620, x: 492.000, y: -217.000, z: 388.000 },
+            { name: "GJ 1214", distance: 48, x: 45.087, y: -9.698, z: 12.598 },
+            { name: "K2-18", distance: 124, x: 108.155, y: 49.465, z: 16.374 },
+            { name: "HD 69830", distance: 41, x: 37.452, y: 10.397, z: -8.947 },
+            { name: "Kepler-62", distance: 980, x: 695.000, y: -306.000, z: 704.000 },
+            { name: "TOI-700", distance: 101, x: 39.886, y: 7.723, z: -92.626 }
+        ];
+        const scaleFactor = 15.0;
+        const centerOfMass = new THREE.Vector3();
+        solarSystems.forEach(system => {
+            centerOfMass.add(new THREE.Vector3(system.x, system.y, system.z));
+        });
+        centerOfMass.divideScalar(solarSystems.length);
+        controls.target.copy(centerOfMass.multiplyScalar(scaleFactor));
+
+        // Camera initial position
+        camera.position.set(0, 200, 200);
+        let galaxyCameraPosition = new THREE.Vector3(0, 2000, 8000);
+        let galaxyCameraTarget = centerOfMass.clone().multiplyScalar(scaleFactor);
+
+        // Transition state
+        let isTransitioning = false;
+        let transitionStartTime = 0;
+        let transitionDuration = 0;
+        let startPosition = new THREE.Vector3();
+        let endPosition = new THREE.Vector3();
+        let startTarget = new THREE.Vector3();
+        let endTarget = new THREE.Vector3();
+        let zoomStage = 0;
+        let currentSection = -1;
+        let pendingSystemLoad = null;
+        let lastCameraPosition = camera.position.clone();
+
+        // Audio setup
+        const systemOpenSound = new Audio('Sounds/space-sound-109576.mp3');
+        const zoomSound = new Audio('Sounds/Zooming_in.mp3');
+        const skyboxSound = new Audio('Sounds/space-sound-109576.mp3');
+        skyboxSound.loop = true;
+        skyboxSound.volume = 0.9;
+        let isAudioInitialized = false;
+
+        // Initialize audio after user interaction
+        function initializeAudio() {
+            if (!isAudioInitialized) {
+                systemOpenSound.play().then(() => systemOpenSound.pause()).catch(() => {});
+                zoomSound.play().then(() => zoomSound.pause()).catch(() => {});
+                skyboxSound.play().then(() => skyboxSound.pause()).catch(() => {});
+                isAudioInitialized = true;
+            }
+        }
+
+        // Raycaster for clicking and hovering
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // Initialize solar system icons with glowing star
+        const sections = [];
+        solarSystems.forEach((system, i) => {
+            const x = system.x * scaleFactor;
+            const y = system.y * scaleFactor;
+            const z = system.z * scaleFactor;
+
+            // Create a group to hold the glowing star
+            const iconGroup = new THREE.Group();
+            const starGeometry = new THREE.SphereGeometry(1.0, 32, 32); // Increased size for visibility
+            const starMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: false }); // Bright yellow, non-transparent
+            const star = new THREE.Mesh(starGeometry, starMaterial);
+            iconGroup.add(star);
+
+            iconGroup.position.set(x, y, z);
+            iconGroup.userData = { sectionId: i, name: system.name, starMaterial };
+            galaxyScene.add(iconGroup);
+
+            // Create galaxy label
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'label';
+            labelDiv.textContent = system.name;
+            labelDiv.dataset.sectionId = i;
+            document.body.appendChild(labelDiv);
+            iconGroup.userData.label = labelDiv;
+
+            sections.push({ icon: iconGroup, position: new THREE.Vector3(x, y, z), label: labelDiv });
+            console.log(`Added star icon for ${system.name} at (${x}, ${y}, ${z})`);
+        });
+
+        // Hover effect with raycasting
+        let lastHoveredIcon = null;
+        canvasContainer.addEventListener('mousemove', (event) => {
+            if (isTransitioning || currentScene !== galaxyScene) return;
+            initializeAudio();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(sections.map(s => s.icon.children).flat());
+
+            sections.forEach(section => {
+                const starMaterial = section.icon.userData.starMaterial;
+                starMaterial.color.set(0xffff00); // Default yellow
+            });
+
+            if (intersects.length > 0) {
+                const intersectedMesh = intersects[0].object;
+                const iconGroup = intersectedMesh.parent;
+                const starMaterial = iconGroup.userData.starMaterial;
+                starMaterial.color.set(0x00B7EB); // Hover color
+                lastHoveredIcon = iconGroup;
+            } else {
+                lastHoveredIcon = null;
+            }
+        });
+
+        // Manage galaxy labels
+        function manageGalaxyLabels() {
+            const minPixelDist = 50;
+            sections.forEach(section => {
+                section.label.style.display = 'block';
+            });
+
+            for (let i = 0; i < sections.length; i++) {
+                for (let j = i + 1; j < sections.length; j++) {
+                    const pos1 = sections[i].position.clone().project(camera);
+                    const pos2 = sections[j].position.clone().project(camera);
+                    const pixelX1 = (pos1.x + 1) * window.innerWidth / 2;
+                    const pixelY1 = (-pos1.y + 1) * window.innerHeight / 2;
+                    const pixelX2 = (pos2.x + 1) * window.innerWidth / 2;
+                    const pixelY2 = (-pos2.y + 1) * window.innerHeight / 2;
+                    const pixelDist = Math.sqrt((pixelX2 - pixelX1) ** 2 + (pixelY2 - pixelY1) ** 2);
+
+                    if (pixelDist < minPixelDist) {
+                        const dist1 = camera.position.distanceTo(sections[i].position);
+                        const dist2 = camera.position.distanceTo(sections[j].position);
+                        if (dist1 > dist2) {
+                            sections[i].label.style.display = 'none';
+                        } else {
+                            sections[j].label.style.display = 'none';
+                        }
+                    }
+                }
+            }
+        }
+
+        // Function to create and manage planet labels
+        function createPlanetLabels(scene, planets) {
+            const planetLabels = [];
+            planets.forEach(planet => {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'planet-label';
+                labelDiv.textContent = planet.name;
+                labelDiv.dataset.planetName = planet.name;
+                document.body.appendChild(labelDiv);
+                planet.mesh.userData.label = labelDiv;
+                planetLabels.push({ mesh: planet.mesh, label: labelDiv });
+            });
+            return planetLabels;
+        }
+
+        // Function to update planet labels
+        function updatePlanetLabels(planetLabels) {
+            planetLabels.forEach(planet => {
+                const vector = planet.mesh.position.clone().project(camera);
+                const x = (vector.x + 1) * window.innerWidth / 2;
+                const y = (-vector.y + 1) * window.innerHeight / 2;
+                const distance = camera.position.distanceTo(planet.mesh.position);
+                const isVisible = vector.z < 1 && distance < 10;
+                planet.label.style.display = isVisible ? 'block' : 'none';
+                if (isVisible) {
+                    planet.label.style.left = `${x}px`;
+                    planet.label.style.top = `${y}px`;
+                }
+            });
+        }
+
+        // Function to populate popup labels
+        function populatePopupLabels(planets) {
+            const popup = document.getElementById('popup');
+            popup.innerHTML = ''; // Clear existing content
+            planets.forEach(planet => {
+                const link = document.createElement('a');
+                link.href = '#';
+                link.textContent = planet.name;
+                link.dataset.planet = planet.name;
+                popup.appendChild(link);
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const planetName = e.target.dataset.planet;
+                    const planetLabel = planetLabels.find(p => p.mesh.userData.label.textContent === planetName);
+                    if (planetLabel) {
+                        const targetPos = planetLabel.mesh.position.clone();
+                        const direction = camera.position.clone().sub(targetPos).normalize();
+                        const endPos = targetPos.clone().add(direction.multiplyScalar(0.5));
+                        transitionTo({ position: endPos, target: targetPos, duration: 1000 });
+                    }
+                });
+            });
+        }
+
+        // Smooth transition function
+        function transitionTo({ position, target, duration, nextStage = 0, callback = null }) {
+            isTransitioning = true;
+            transitionStartTime = performance.now();
+            transitionDuration = duration;
+            startPosition.copy(camera.position);
+            endPosition.copy(position);
+            startTarget.copy(controls.target);
+            endTarget.copy(target);
+            zoomStage = nextStage;
+            if (callback) {
+                pendingSystemLoad = callback;
+            }
+            if (nextStage === 1 && isAudioInitialized) {
+                zoomSound.currentTime = 0;
+                zoomSound.play().catch(() => {});
+            }
+        }
+
+        // Current scene and solar system scenes
+        let currentScene = galaxyScene;
+        const solarSystemScenes = Array(solarSystems.length).fill(null);
+        let planetLabels = [];
+        let currentStar = null;
+
+        // Array to store createSolarSystem functions for each system
+        const systemCreators = Array(solarSystems.length).fill(null);
+
+        // Fallback createSolarSystem function
+        function createSolarSystem(sectionId, scene, camera, controls) {
+            const starGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const starMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+            const star = new THREE.Mesh(starGeometry, starMaterial);
+            scene.add(star);
+            const starLabel = document.createElement('div');
+            starLabel.className = 'planet-label';
+            starLabel.textContent = solarSystems[sectionId].name;
+            document.body.appendChild(starLabel);
+            star.userData.label = starLabel;
+            planetLabels = [{ mesh: star, label: starLabel }];
+            scene.userData.animate = (time) => {};
+        }
+
+        // Preload solar system scripts
+        function preloadSolarSystemScripts() {
+            solarSystems.forEach((_, index) => {
+                const script = document.createElement('script');
+                script.src = `systems/system-${index + 1}.js`;
+                script.async = true;
+                script.onload = () => {
+                    if (typeof createSolarSystem === 'function') {
+                        systemCreators[index] = createSolarSystem;
+                        window.createSolarSystem = undefined;
+                    } else {
+                        console.warn(`createSolarSystem not defined in system-${index + 1}.js`);
+                    }
+                };
+                script.onerror = () => {
+                    console.error(`Failed to load system-${index + 1}.js`);
+                };
+                document.head.appendChild(script);
+            });
+        }
+        preloadSolarSystemScripts();
+
+        // Modified load solar system function
+        function loadSolarSystem(sectionId) {
+            galaxyCameraPosition.copy(camera.position);
+            galaxyCameraTarget.copy(controls.target);
+
+            const targetPos = sections[sectionId].position.clone();
+            const direction = camera.position.clone().sub(targetPos).normalize();
+            const endPos = targetPos.clone().add(direction.multiplyScalar(10));
+            transitionTo({
+                position: endPos,
+                target: targetPos,
+                duration: 2000,
+                nextStage: 1,
+                callback: () => {
+                    if (!solarSystemScenes[sectionId]) {
+                        solarSystemScenes[sectionId] = new THREE.Scene();
+                        solarSystemScenes[sectionId].background = new THREE.Color(0x000000);
+                        const skyboxClone = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+                        solarSystemScenes[sectionId].add(skyboxClone);
+
+                        const createSystem = systemCreators[sectionId] || createSolarSystem;
+                        createSystem(sectionId, solarSystemScenes[sectionId], camera, controls);
+                        finalizeSystemLoad(sectionId);
+                    } else {
+                        finalizeSystemLoad(sectionId);
+                    }
+                }
+            });
+        }
+
+        function finalizeSystemLoad(sectionId) {
+            currentScene = solarSystemScenes[sectionId];
+            currentSection = sectionId;
+            backButton.style.display = 'block';
+            controls.enabled = true;
+            sections.forEach(section => {
+                section.label.style.display = 'none';
+                section.label.style.pointerEvents = 'none';
+            });
+            document.querySelector('.habitable-zone').style.display = 'block';
+            document.querySelector('.buttons-container').style.display = 'block';
+
+            const targetPos = new THREE.Vector3(0, 0, 0);
+            const direction = camera.position.clone().sub(targetPos).normalize();
+            const endPos = targetPos.clone().add(direction.multiplyScalar(2));
+            transitionTo({ position: endPos, target: targetPos, duration: 2000, nextStage: 2 });
+            if (isAudioInitialized) {
+                systemOpenSound.currentTime = 0;
+                systemOpenSound.play().catch(() => {});
+            }
+            renderer.render(currentScene, camera);
+        }
+
+        // Back button
+        const backButton = document.querySelector('.back-button');
+        let backZoomStage = 0;
+        backButton.addEventListener('click', () => {
+            if (backZoomStage === 0) {
+                const targetPos = new THREE.Vector3(0, 0, 0);
+                const direction = camera.position.clone().sub(targetPos).normalize();
+                const endPos = targetPos.clone().add(direction.multiplyScalar(10));
+                transitionTo({ position: endPos, target: targetPos, duration: 2000, nextStage: 0 });
+                backZoomStage = 1;
+            } else {
+                document.querySelectorAll('.label, .planet-label').forEach(label => label.remove());
+
+                sections.forEach(section => {
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'label';
+                    labelDiv.textContent = solarSystems[section.icon.userData.sectionId].name;
+                    labelDiv.dataset.sectionId = section.icon.userData.sectionId;
+                    document.body.appendChild(labelDiv);
+                    section.label = labelDiv;
+                    section.icon.userData.label = labelDiv;
+                    section.label.style.display = 'block';
+                    section.label.style.pointerEvents = 'auto';
+                });
+
+                currentScene = galaxyScene;
+                backButton.style.display = 'none';
+                document.querySelector('.habitable-zone').style.display = 'none';
+                document.querySelector('.buttons-container').style.display = 'none';
+
+                const currentSystem = solarSystems[currentSection];
+                const systemPos = new THREE.Vector3(
+                    currentSystem.x * scaleFactor,
+                    currentSystem.y * scaleFactor,
+                    currentSystem.z * scaleFactor
+                );
+                const direction = camera.position.clone().normalize();
+                const galaxyViewPos = systemPos.clone().add(direction.multiplyScalar(2000));
+
+                transitionTo({
+                    position: galaxyViewPos,
+                    target: systemPos,
+                    duration: 2000
+                });
+
+                if (solarSystemScenes[currentSection]) {
+                    solarSystemScenes[currentSection].children.forEach(child => {
+                        if (child.userData.label) {
+                            child.userData.label.remove();
+                        }
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(mat => mat.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
+                    solarSystemScenes[currentSection].clear();
+                    solarSystemScenes[currentSection] = null;
+                }
+                planetLabels = [];
+                currentStar = null;
+                currentSection = -1;
+                backZoomStage = 0;
+                if (isAudioInitialized) {
+                    skyboxSound.play().catch(() => {});
+                }
+                composer.render();
+            }
+        });
+
+        // Click handler for icons
+        function onClick(event) {
+            event.preventDefault();
+            if (isTransitioning || currentScene !== galaxyScene) return;
+            initializeAudio();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(sections.map(s => s.icon.children).flat());
+            if (intersects.length > 0) {
+                const sectionId = intersects[0].object.parent.userData.sectionId;
+                loadSolarSystem(sectionId);
+            }
+        }
+
+        canvasContainer.addEventListener('click', onClick);
+
+        // Label click handler
+        function attachLabelClickHandler() {
+            document.removeEventListener('click', labelClickHandler);
+            document.addEventListener('click', labelClickHandler);
+        }
+
+        function labelClickHandler(event) {
+            if (isTransitioning) return;
+            if (event.target.classList.contains('label')) {
+                initializeAudio();
+                const sectionId = parseInt(event.target.dataset.sectionId);
+                loadSolarSystem(sectionId);
+            }
+        }
+
+        attachLabelClickHandler();
+
+        // Popup and view buttons interaction
+        const trigger = document.getElementById('popup-trigger');
+        const popup = document.getElementById('popup');
+        let isHovering = false;
+
+        window.addEventListener('load', () => {
+            popup.style.display = 'none';
+            document.querySelector('.habitable-zone').style.display = 'none';
+            document.querySelector('.buttons-container').style.display = 'none';
+        });
+
+        trigger.addEventListener('mouseover', () => {
+            isHovering = true;
+            popup.style.display = 'block';
+        });
+
+        trigger.addEventListener('mouseout', () => {
+            isHovering = false;
+            setTimeout(() => {
+                if (!isHovering) {
+                    popup.style.display = 'none';
+                }
+            }, 100);
+        });
+
+        popup.addEventListener('mouseover', () => {
+            isHovering = true;
+            popup.style.display = 'block';
+        });
+
+        popup.addEventListener('mouseout', () => {
+            isHovering = false;
+            setTimeout(() => {
+                if (!isHovering) {
+                    popup.style.display = 'none';
+                }
+            }, 100);
+        });
+
+        // Animation loop
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            if (currentScene === galaxyScene) {
+                sections.forEach(section => {
+                    section.icon.lookAt(camera.position);
+                    section.icon.rotation.y += 0.01; // Rotate star for dynamic effect
+                });
+                manageGalaxyLabels();
+                sections.forEach(section => {
+                    section.icon.lookAt(camera.position);
+                    const vector = section.position.clone().project(camera);
+                    const label = section.icon.userData.label;
+                    label.style.left = `${(vector.x + 1) * window.innerWidth / 2}px`;
+                    label.style.top = `${(-vector.y + 1) * window.innerHeight / 2}px`;
+                });
+                attachLabelClickHandler();
+            } else if (currentScene !== galaxyScene && planetLabels.length > 0) {
+                // Handle planet clicking
+                mouse.x = (lastMouseX / window.innerWidth) * 2 - 1;
+                mouse.y = -(lastMouseY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                const planetIntersects = raycaster.intersectObjects(planetLabels.map(p => p.mesh));
+                if (planetIntersects.length > 0 && !isTransitioning) {
+                    const clickedPlanet = planetIntersects[0].object;
+                    const targetPos = clickedPlanet.position.clone();
+                    const direction = camera.position.clone().sub(targetPos).normalize();
+                    const endPos = targetPos.clone().add(direction.multiplyScalar(0));
+                    transitionTo({ position: endPos, target: targetPos, duration: 1000 });
+                }
+                updatePlanetLabels(planetLabels);
+            }
+
+            if (currentScene === galaxyScene && isAudioInitialized && skyboxSound.paused) {
+                skyboxSound.play().catch(() => {});
+            } else if (currentScene !== galaxyScene && !skyboxSound.paused) {
+                skyboxSound.pause();
+            }
+
+            const cameraSpeed = camera.position.distanceTo(lastCameraPosition) / 0.016;
+            if (cameraSpeed > 0.1) {
+                starMaterial.size = 1.5;
+                starMaterial.opacity = 0.5;
+                galaxyScene.fog.near = 100;
+                galaxyScene.fog.far = 5000;
+            } else {
+                starMaterial.size = 0.5;
+                starMaterial.opacity = 0.8;
+                galaxyScene.fog.near = 100;
+                galaxyScene.fog.far = 10000;
+            }
+            lastCameraPosition.copy(camera.position);
+
+            if (isTransitioning) {
+                const elapsed = performance.now() - transitionStartTime;
+                const t = Math.min(elapsed / transitionDuration, 1);
+                camera.position.lerpVectors(startPosition, endPosition, t);
+                controls.target.lerpVectors(startTarget, endTarget, t);
+                if (t >= 1) {
+                    isTransitioning = false;
+                    if (pendingSystemLoad) {
+                        pendingSystemLoad();
+                        pendingSystemLoad = null;
+                    }
+                }
+            }
+
+            if (currentScene !== galaxyScene && currentSection !== -1 && solarSystemScenes[currentSection]) {
+                if (solarSystemScenes[currentSection].userData.animate) {
+                    solarSystemScenes[currentSection].userData.animate(time);
+                }
+            }
+
+            controls.update();
+            try {
+                if (currentScene === galaxyScene) {
+                    composer.render();
+                } else {
+                    renderer.render(currentScene, camera);
+                }
+            } catch (e) {
+                console.error('Rendering error:', e);
+                renderer.render(currentScene, camera); // Fallback
+            }
+        }
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        canvasContainer.addEventListener('mousemove', (e) => {
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        });
+        animate();
+
+        // Handle window resize
+        function onWindowResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            composer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            attachLabelClickHandler();
+        }
+        window.addEventListener('resize', onWindowResize);
+    </script>
+</body>
+</html>

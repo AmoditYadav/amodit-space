@@ -23,33 +23,19 @@ export function Moon({
   const groupRef = useRef<THREE.Group>(null);
   const angleRef = useRef(orbitOffset);
 
-  // Moon texture
-  const moonTexture = useMemo(() => {
-    const textureSize = 64;
-    const data = new Uint8Array(textureSize * textureSize * 4);
-
-    for (let i = 0; i < textureSize * textureSize; i++) {
-      const x = (i % textureSize) / textureSize;
-      const y = Math.floor(i / textureSize) / textureSize;
-
-      let gray = 180;
-      const crater1 = Math.sin(x * 30 + 0.5) * Math.sin(y * 25) * 0.3;
-      const crater2 = Math.sin(x * 50 - y * 40) * 0.15;
-      const crater3 = Math.sin(x * 80 + y * 60) * 0.1;
-      const microNoise = (Math.random() - 0.5) * 0.08;
-      const variation = crater1 + crater2 + crater3 + microNoise;
-      gray = gray * (1 + variation * 0.4);
-      gray = Math.min(220, Math.max(120, gray));
-
-      data[i * 4] = gray;
-      data[i * 4 + 1] = gray - 5;
-      data[i * 4 + 2] = gray - 8;
-      data[i * 4 + 3] = 255;
-    }
-
-    const texture = new THREE.DataTexture(data, textureSize, textureSize);
-    texture.needsUpdate = true;
-    return texture;
+  // Load realistic Moon textures
+  const { colorMap, displacementMap } = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    const color = loader.load("https://s3-us-west-2.amazonaws.com/s.cdpn.io/17271/lroc_color_poles_1k.jpg");
+    const disp = loader.load("https://s3-us-west-2.amazonaws.com/s.cdpn.io/17271/ldem_3_8bit.jpg");
+    
+    // Set wrapping and filtering for high quality
+    color.minFilter = THREE.LinearMipmapLinearFilter;
+    color.generateMipmaps = true;
+    disp.minFilter = THREE.LinearMipmapLinearFilter;
+    disp.generateMipmaps = true;
+    
+    return { colorMap: color, displacementMap: disp };
   }, []);
 
   useFrame(() => {
@@ -67,23 +53,34 @@ export function Moon({
     }
   });
 
+  // Calculate appropriate displacement and bump scale based on moon's actual size.
+  // The original template used radius 2 and displacement scale 0.06 (3% of radius).
+  const scaleRatio = size / 2.0;
+  const displacementScale = 0.06 * scaleRatio;
+  const bumpScale = 0.04 * scaleRatio;
+
   return (
     <group ref={groupRef}>
       <mesh ref={moonRef}>
-        <sphereGeometry args={[size, 16, 16]} />
+        {/* Increased segments to 64 for rich bumpy detail rendering */}
+        <sphereGeometry args={[size, 64, 64]} />
         <meshStandardMaterial
-          map={moonTexture}
-          roughness={0.95}
+          map={colorMap}
+          displacementMap={displacementMap}
+          displacementScale={displacementScale}
+          bumpMap={displacementMap}
+          bumpScale={bumpScale}
+          roughness={1.0}
           metalness={0.0}
         />
       </mesh>
       {/* Subtle moon glow */}
       <mesh>
-        <sphereGeometry args={[size * 1.3, 8, 8]} />
+        <sphereGeometry args={[size * 1.15, 16, 16]} />
         <meshBasicMaterial
           color="#ffffff"
           transparent
-          opacity={0.03}
+          opacity={0.02}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
@@ -92,3 +89,4 @@ export function Moon({
     </group>
   );
 }
+

@@ -14,6 +14,7 @@ import { PLANETS } from '@/lib/orbital-mechanics';
 import { usePortfolioStore } from '@/store/usePortfolioStore';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { GalaxyCluster } from './GalaxyCluster';
 
 // ─── Scene time manager (uses useFrame instead of setInterval) ───────────────
 function TimeManager({ children }: { children: (time: number) => React.ReactNode }) {
@@ -71,14 +72,15 @@ function PlanetFadeController({ children }: { children: (opacity: number) => Rea
 function FadingGroup({ opacity, children }: { opacity: number; children: React.ReactNode }) {
   const groupRef = useRef<THREE.Group>(null);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (groupRef.current) {
-      // Control visibility via scale (0→1). Using scale instead of opacity
-      // because Three.js meshes don't have a global opacity property.
-      // At opacity=0 we scale to near-zero, ramping to 1.
-      const s = Math.max(0.001, opacity);
+      const distance = state.camera.position.length();
+      // Zoom fade factor: 1 when distance <= 60, ramps down to 0 at distance 120
+      const zoomFade = Math.min(1, Math.max(0, (120 - distance) / 60));
+      const combinedOpacity = opacity * zoomFade;
+      const s = Math.max(0.001, combinedOpacity);
       groupRef.current.scale.setScalar(s);
-      groupRef.current.visible = opacity > 0.01;
+      groupRef.current.visible = combinedOpacity > 0.01;
     }
   });
 
@@ -100,6 +102,9 @@ function SolarSystemScene({ isMobile }: { isMobile: boolean }) {
 
       {/* Subtle nebula fog (desktop only) */}
       {!isMobile && <NebulaLayer />}
+
+      {/* Galaxy Cluster background & system nodes */}
+      <GalaxyCluster />
 
       {/* The Sun — appears first during intro */}
       <Sun />
@@ -225,7 +230,7 @@ export function SolarSystem({ className = '' }: SolarSystemProps) {
           failIfMajorPerformanceCaveat: false,
           toneMapping: 0,
         }}
-        camera={{ fov: isMobile ? 55 : 50, near: 0.1, far: 500 }}
+        camera={{ fov: isMobile ? 55 : 50, near: 0.1, far: 50000 }}
         onCreated={({ gl }) => {
           gl.setClearColor('#000000');
         }}

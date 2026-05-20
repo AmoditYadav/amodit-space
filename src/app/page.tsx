@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { CVButton } from '@/components/CVButton';
 import { SandboxControls } from '@/components/SandboxControls';
+import { GoHomeButton } from '@/components/GoHomeButton';
 import { usePortfolioStore } from '@/store/usePortfolioStore';
 
 const SolarSystem = dynamic(
@@ -25,6 +26,9 @@ export default function Home() {
 
       {/* Sandbox controls — bottom-left */}
       <SandboxControls />
+
+      {/* Go Home button — bottom-right (above audio player) */}
+      <GoHomeButton />
 
       {/* Tagline below CV button */}
       <div

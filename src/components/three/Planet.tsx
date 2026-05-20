@@ -36,6 +36,23 @@ void main() {
 }
 `;
 
+// Earth atmosphere shader from earth.html
+const earthAtmosphereVert = /* glsl */`
+varying vec3 vNormal;
+void main() {
+  vNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const earthAtmosphereFrag = /* glsl */`
+varying vec3 vNormal;
+void main() {
+  float intensity = pow(0.8 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+  gl_FragColor = vec4(0.3, 0.6, 1.0, 0.5) * intensity;
+}
+`;
+
 interface PlanetProps {
   config: PlanetConfig;
   time: number;
@@ -44,6 +61,7 @@ interface PlanetProps {
 
 export function Planet({ config, time, isMobile = false }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const cloudRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const router = useRouter();
   const [hovered, setHovered] = useState(false);
@@ -67,6 +85,21 @@ export function Planet({ config, time, isMobile = false }: PlanetProps) {
     }),
     [config.atmosphereColor, config.color, config.hasAtmosphere]
   );
+
+  // Load realistic planet textures
+  const { earthTexture, cloudsTexture, marsTexture, jupiterTexture, neptuneTexture } = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    const earth = loader.load('https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Whole_world_-_land_and_oceans.jpg/1280px-Whole_world_-_land_and_oceans.jpg');
+    const clouds = loader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png');
+    const mars = loader.load('/textures/8k_mars.jpg');
+    const jupiter = loader.load('/textures/8k_jupiter.jpg');
+    const neptune = loader.load('/textures/2k_neptune.jpg');
+    [earth, clouds, mars, jupiter, neptune].forEach(tex => {
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.generateMipmaps = true;
+    });
+    return { earthTexture: earth, cloudsTexture: clouds, marsTexture: mars, jupiterTexture: jupiter, neptuneTexture: neptune };
+  }, []);
 
   // Procedural texture — higher resolution for sharpness
   const planetTexture = useMemo(() => {
@@ -159,6 +192,11 @@ export function Planet({ config, time, isMobile = false }: PlanetProps) {
       meshRef.current.rotation.y += config.rotationSpeed;
     }
 
+    // Rotate clouds independently, slightly faster
+    if (cloudRef.current) {
+      cloudRef.current.rotation.y += config.rotationSpeed * 1.2;
+    }
+
     // Smooth hover scale transition
     const targetScale = hovered ? config.size * TIMING.planetHoverScale : config.size;
     scaleRef.current += (targetScale - scaleRef.current) * 0.08;
@@ -198,6 +236,8 @@ export function Planet({ config, time, isMobile = false }: PlanetProps) {
   const moonSize = 0.12;
   const moonOrbitSpeed = 0.015;
 
+  const isEarth = config.id === 'about';
+
   return (
     <group>
       <group position={position} ref={groupRef}>
@@ -211,7 +251,7 @@ export function Planet({ config, time, isMobile = false }: PlanetProps) {
         >
           <sphereGeometry args={[1, 48, 48]} />
           <meshStandardMaterial
-            map={planetTexture}
+            map={isEarth ? earthTexture : (config.id === 'projects' ? marsTexture : (config.id === 'blog' ? jupiterTexture : (config.id === 'contact' ? neptuneTexture : planetTexture)))}
             roughness={config.id === 'blog' ? 0.7 : 0.85}
             metalness={0.0}
             emissive={config.emissive || '#000000'}
@@ -221,19 +261,34 @@ export function Planet({ config, time, isMobile = false }: PlanetProps) {
           />
         </mesh>
 
+        {/* Cloud layer (Earth only) */}
+        {isEarth && (
+          <mesh ref={cloudRef} scale={1.02} rotation={[0.1, 0, 0.05]}>
+            <sphereGeometry args={[1, 48, 48]} />
+            <meshBasicMaterial
+              map={cloudsTexture}
+              transparent
+              opacity={0.6}
+              blending={THREE.NormalBlending}
+              depthWrite={true}
+            />
+          </mesh>
+        )}
+
         {/* Atmosphere glow — all planets get a subtle one */}
-        <mesh scale={1.12}>
+        <mesh scale={isEarth ? 1.15 : 1.12}>
           <sphereGeometry args={[1, 32, 32]} />
           <shaderMaterial
-            vertexShader={atmosphereVert}
-            fragmentShader={atmosphereFrag}
-            uniforms={atmosphereUniforms}
+            vertexShader={isEarth ? earthAtmosphereVert : atmosphereVert}
+            fragmentShader={isEarth ? earthAtmosphereFrag : atmosphereFrag}
+            uniforms={isEarth ? {} : atmosphereUniforms}
             transparent
             side={THREE.BackSide}
             depthWrite={false}
             blending={THREE.AdditiveBlending}
           />
         </mesh>
+
 
         {/* Hover glow ring */}
         {hovered && (

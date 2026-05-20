@@ -20,6 +20,13 @@ interface PortfolioState {
   zoomTarget: { position: [number, number, number]; route: string } | null;
   setZoomTarget: (target: { position: [number, number, number]; route: string } | null) => void;
 
+  // Star System Focus
+  focusedSystem: string | null;
+  setFocusedSystem: (v: string | null) => void;
+
+  inGalaxyView: boolean;
+  setInGalaxyView: (v: boolean) => void;
+
   // Device
   isMobile: boolean;
   setIsMobile: (v: boolean) => void;
@@ -50,6 +57,12 @@ export const usePortfolioStore = create<PortfolioState>((set) => ({
 
   zoomTarget: null,
   setZoomTarget: (target) => set({ zoomTarget: target }),
+
+  focusedSystem: null,
+  setFocusedSystem: (v) => set({ focusedSystem: v }),
+
+  inGalaxyView: false,
+  setInGalaxyView: (v) => set({ inGalaxyView: v }),
 
   isMobile: false,
   setIsMobile: (v) => set({ isMobile: v }),
